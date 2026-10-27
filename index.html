@@ -1,70 +1,144 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Crane Motor Watch · Demo</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#112942">
+<title>Machine Health Monitor · Demo</title>
 <style>
-:root{--navy:#112942;--blue:#1c4564;--ink:#203247;--muted:#718096;--line:#e2e9ef;--bg:#f3f6f9;--teal:#16877d;--amber:#bd7b22;--red:#b44942;--green:#16816c}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",Arial,sans-serif}.layout{min-height:100vh;display:grid;grid-template-columns:230px minmax(0,1fr)}aside{background:var(--navy);color:white;padding:22px 14px;display:flex;flex-direction:column}.brand{font-size:17px;font-weight:750;padding:7px 10px 21px;border-bottom:1px solid #ffffff22}.brand small{display:block;color:#afc0cf;font-size:9px;letter-spacing:1px;margin-top:3px}.nav-title{font-size:9px;color:#9eb2c5;letter-spacing:1.1px;font-weight:800;margin:18px 9px 7px}.nav,.crane{width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#d8e3ec;padding:9px 10px;border-radius:7px;font:inherit;cursor:pointer;margin-bottom:4px}.nav:hover,.crane:hover{background:#1b3d5a}.nav.active,.crane.active{background:#254965;border-color:#3d657f;color:white}.crane{display:flex;justify-content:space-between;align-items:center;font-size:12px}.crane small{display:block;color:#adc0cf;font-size:10px}.dot{width:8px;height:8px;border-radius:50%;background:#35ad91}.dot.warn{background:#e4a443}.side-note{margin-top:auto;border-top:1px solid #ffffff22;padding:13px 8px 0;font-size:10px;color:#b8c6d2}.side-note b{display:inline-block;color:#f0d59c;background:#ffffff12;padding:4px 6px;border-radius:4px;margin-bottom:5px;font-size:9px;letter-spacing:.6px}main{padding:26px clamp(14px,3vw,38px);max-width:1500px;width:100%;margin:auto}.site-links{display:flex;gap:8px;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--line)}.site-links a{color:var(--blue);text-decoration:none;font-weight:700;font-size:12px;padding:7px 11px;border-radius:6px}.site-links a:hover,.site-links a[aria-current="page"]{background:#e4efef;color:var(--teal)}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:17px}.eyebrow{font-size:9px;color:var(--teal);font-weight:800;letter-spacing:1.1px;text-transform:uppercase}h1{font-size:24px;line-height:1.2;margin:4px 0}.subtitle{font-size:12px;color:var(--muted)}.pill{white-space:nowrap;border-radius:20px;padding:6px 9px;background:#fff3dc;border:1px solid #efd9ae;color:#8d621f;font-size:9px;font-weight:800;letter-spacing:.6px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:11px}.card,.metric,.motor{background:white;border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}.label{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:.7px;text-transform:uppercase}.number{font-size:24px;font-weight:800;margin-top:6px}.note{font-size:10px;color:#8b98a5;margin-top:2px}.cols{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(245px,1fr);gap:11px;margin-bottom:11px}.card h2{font-size:13px;margin:0 0 10px}.chart{display:block;width:100%;height:160px;background:#f8fbfa;border:1px solid #e7efed;border-radius:7px}.chart line{stroke:#e3ecea}.chart path{fill:none;stroke:var(--teal);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.chart .area{fill:#e0f2ee;stroke:none}.axis{display:flex;justify-content:space-between;color:#8795a2;font-size:9px;margin-top:4px}.alert{display:block;width:100%;text-align:left;border-radius:7px;border:1px solid #f0dfc3;border-left:3px solid var(--amber);background:#fff9ee;padding:9px;margin-bottom:7px;font:inherit;cursor:pointer}.alert:hover{background:#fff2dc}.alert strong{font-size:11px}.alert p{margin:3px 0 0;color:var(--muted);font-size:10px}.alert.critical{border-color:#f0d9d6;border-left-color:var(--red);background:#fff7f6}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}th{font-size:9px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line)}td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child td{border-bottom:0}.link{border:0;background:none;padding:0;color:var(--teal);font:inherit;font-weight:700;cursor:pointer}.status{border-radius:12px;padding:3px 6px;font-size:9px;font-weight:800;background:#eaf6f1;color:var(--green)}.status.warn{background:#fff2de;color:#93601a}.status.bad{background:#fff0ee;color:var(--red)}.back{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 9px;font:inherit;font-size:10px;cursor:pointer;margin-bottom:10px}.motors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:11px}.motor{cursor:pointer;transition:.15s}.motor:hover{border-color:#83b9b0;transform:translateY(-1px)}.motor h3{font-size:12px;margin:0 0 3px}.motor-id{font-size:9px;color:var(--muted)}.readings{display:flex;gap:8px;margin-top:12px}.readings div{flex:1;font-size:9px;color:var(--muted)}.readings b{display:block;color:var(--ink);font-size:13px;margin-top:3px}.maintenance{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px}.maintenance div{border-top:1px solid var(--line);padding-top:8px;font-size:10px}.maintenance small{display:block;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.5px;margin-bottom:3px}.hidden{display:none!important}.footer{text-align:right;color:#8d99a5;font-size:9px;margin-top:10px}.footer a{color:var(--teal);font-weight:700;text-decoration:none}.footer a:hover{text-decoration:underline}
-@media(max-width:850px){.layout{grid-template-columns:195px 1fr}.metrics{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}.motors{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.layout{grid-template-columns:1fr}aside{padding:12px}.brand{padding:3px 7px 11px}.nav-title{margin-top:10px}.crane-list{display:flex;overflow:auto;gap:4px}.crane{min-width:115px;width:auto;padding:8px}.side-note{margin-top:7px;padding-top:8px}main{padding:16px 11px}.top{align-items:flex-start}h1{font-size:20px}.pill{font-size:8px}.metrics{gap:7px}.metric,.card{padding:11px}.motors{grid-template-columns:1fr}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}}
+:root{--navy:#112942;--blue:#1c4564;--ink:#203247;--muted:#718096;--line:#e2e9ef;--bg:#f3f6f9;--teal:#16877d;--amber:#bd7b22;--red:#b44942;--green:#16816c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Segoe UI",Arial,sans-serif}
+.layout{min-height:100vh;display:grid;grid-template-columns:240px minmax(0,1fr)}
+aside{background:var(--navy);color:white;padding:22px 14px;display:flex;flex-direction:column}
+.brand{font-size:17px;font-weight:750;padding:7px 10px 21px;border-bottom:1px solid #ffffff22}.brand small{display:block;color:#afc0cf;font-size:9px;letter-spacing:1px;margin-top:3px}
+.nav-title{font-size:9px;color:#9eb2c5;letter-spacing:1.1px;font-weight:800;margin:20px 9px 7px}
+.nav-link{display:block;text-decoration:none;width:100%;text-align:left;border:1px solid transparent;background:transparent;color:#d8e3ec;padding:10px;border-radius:7px;font:inherit;cursor:pointer;margin-bottom:4px}
+.nav-link:hover,.nav-link.active{background:#254965;border-color:#3d657f;color:white}
+.machine-select{width:100%;padding:10px;border:1px solid #527087;border-radius:7px;background:#193851;color:white;font:inherit}
+.machine-select:focus,.nav-link:focus{outline:2px solid #52c8ba;outline-offset:2px}
+.side-note{margin-top:auto;border-top:1px solid #ffffff22;padding:13px 8px 0;font-size:10px;color:#b8c6d2}
+.side-note b{display:inline-block;color:#f0d59c;background:#ffffff12;padding:4px 6px;border-radius:4px;margin-bottom:5px;font-size:9px;letter-spacing:.6px}
+main{padding:26px clamp(14px,3vw,38px);max-width:1500px;width:100%;margin:auto}
+.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:17px}
+.eyebrow{font-size:9px;color:var(--teal);font-weight:800;letter-spacing:1.1px;text-transform:uppercase}
+h1{font-size:24px;line-height:1.2;margin:4px 0}.subtitle{font-size:12px;color:var(--muted)}
+.pill{white-space:nowrap;border-radius:20px;padding:6px 9px;background:#fff3dc;border:1px solid #efd9ae;color:#8d621f;font-size:9px;font-weight:800;letter-spacing:.6px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:11px}
+.card,.metric{background:white;border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.label{font-size:9px;color:var(--muted);font-weight:800;letter-spacing:.7px;text-transform:uppercase}
+.number{font-size:24px;font-weight:800;margin-top:6px}.note{font-size:10px;color:#8b98a5;margin-top:2px}
+.cols{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(245px,1fr);gap:11px;margin-bottom:11px}
+.card h2{font-size:13px;margin:0 0 10px}
+.chart{display:block;width:100%;height:160px;background:#f8fbfa;border:1px solid #e7efed;border-radius:7px}
+.chart line{stroke:#e3ecea}.chart path{fill:none;stroke:var(--teal);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}.chart .area{fill:#e0f2ee;stroke:none}
+.axis{display:flex;justify-content:space-between;color:#8795a2;font-size:9px;margin-top:4px}
+.alert{display:block;width:100%;text-align:left;border-radius:7px;border:1px solid #f0dfc3;border-left:3px solid var(--amber);background:#fff9ee;padding:9px;margin-bottom:7px;font:inherit;cursor:pointer}
+.alert:hover{background:#fff2dc}.alert strong{font-size:11px}.alert p{margin:3px 0 0;color:var(--muted);font-size:10px}
+.alert.critical{border-color:#f0d9d6;border-left-color:var(--red);background:#fff7f6}
+.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}
+th{font-size:9px;letter-spacing:.5px;color:var(--muted);text-align:left;padding:8px;border-bottom:1px solid var(--line)}
+td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child td{border-bottom:0}
+.link{border:0;background:none;padding:0;color:var(--teal);font:inherit;font-weight:700;cursor:pointer}
+.status{border-radius:12px;padding:3px 6px;font-size:9px;font-weight:800;background:#eaf6f1;color:var(--green)}
+.status.warn{background:#fff2de;color:#93601a}.status.bad{background:#fff0ee;color:var(--red)}
+.machine-detail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:11px}
+.reading{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px}
+.reading strong{display:block;font-size:23px;margin-top:6px}
+.maintenance{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px}
+.maintenance div{border-top:1px solid var(--line);padding-top:8px;font-size:10px}
+.maintenance small{display:block;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.5px;margin-bottom:3px}
+.footer{color:#8d99a5;font-size:9px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.footer a{color:var(--teal);font-weight:700;text-decoration:none}.footer a:hover{text-decoration:underline}
+.hidden{display:none!important}
+@media(max-width:850px){.layout{grid-template-columns:205px 1fr}.metrics{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
+@media(max-width:600px){.layout{grid-template-columns:1fr}aside{padding:12px}.brand{padding:3px 7px 11px}.nav-title{margin-top:10px}.side-note{margin-top:12px;padding-top:8px}main{padding:16px 11px}.top{align-items:flex-start}h1{font-size:20px}.pill{font-size:8px}.metrics{gap:7px}.metric,.card{padding:11px}.machine-detail{grid-template-columns:1fr}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}}
 </style>
 </head>
 <body>
 <div class="layout">
 <aside>
-  <div class="brand">Crane Motor Watch<small>STUDENT PROJECT DEMO</small></div>
-  <button class="nav active" id="overview-button">▦ &nbsp; Fleet overview</button>
-  <div class="nav-title">CHOOSE A CRANE</div>
-  <div id="cranes" class="crane-list"></div>
-  <div class="side-note"><b>SAMPLE DATA · NOT LIVE</b><br>Placeholder cranes and readings. No equipment is connected.</div>
+  <div class="brand">Machine Health Monitor<small>CONDITION MONITORING DEMO</small></div>
+  <div class="nav-title">MENU</div>
+  <a class="nav-link active" id="home-link" href="index.html">⌂ &nbsp; Home</a>
+  <label class="nav-title" for="machine-menu">MACHINES</label>
+  <select class="machine-select" id="machine-menu" aria-label="Select a machine">
+    <option value="">Choose a machine…</option>
+    <option value="1">Machine 1</option><option value="2">Machine 2</option><option value="3">Machine 3</option>
+    <option value="4">Machine 4</option><option value="5">Machine 5</option><option value="6">Machine 6</option>
+  </select>
+  <div class="nav-title">INFORMATION</div>
+  <a class="nav-link" href="about.html">About</a>
+  <a class="nav-link" href="contact.html">Contact</a>
+  <div class="side-note"><b>SAMPLE DATA · NOT LIVE</b><br>Illustrative machine readings only. No equipment is connected.</div>
 </aside>
 <main>
-  <nav class="site-links" aria-label="Main pages"><a href="index.html" aria-current="page">Dashboard</a><a href="about.html">About</a><a href="contact.html">Contact</a></nav>
-  <div class="top"><div><div class="eyebrow" id="eyebrow">Fleet monitoring</div><h1 id="title">Fleet overview</h1><div class="subtitle" id="subtitle">See priority warnings and the next planned maintenance across the demo fleet.</div></div><span class="pill">FICTIONAL SAMPLE READINGS</span></div>
+  <div class="top"><div><div class="eyebrow" id="eyebrow">Fleet monitoring</div><h1 id="title">Overview</h1><div class="subtitle" id="subtitle">A single view of machine condition, priority alerts, and upcoming maintenance.</div></div><span class="pill">FICTIONAL SAMPLE READINGS</span></div>
   <section id="overview-view">
     <div class="metrics">
-      <div class="metric"><div class="label">Placeholder cranes</div><div class="number">4</div><div class="note">Example RTG and STS IDs</div></div>
-      <div class="metric"><div class="label">Motors in demo</div><div class="number">12</div><div class="note">Three per sample crane</div></div>
-      <div class="metric"><div class="label">Needs attention</div><div class="number" style="color:var(--red)">3</div><div class="note">Two inspect · one monitor</div></div>
-      <div class="metric"><div class="label">Next maintenance</div><div class="number">5</div><div class="note">Upcoming sample jobs</div></div>
+      <div class="metric"><div class="label">Machines monitored</div><div class="number">6</div><div class="note">Demo equipment list</div></div>
+      <div class="metric"><div class="label">Healthy</div><div class="number" id="healthy-count">3</div><div class="note">Based on illustrative data</div></div>
+      <div class="metric"><div class="label">Needs attention</div><div class="number" id="attention-count" style="color:var(--red)">3</div><div class="note">Review sample alerts</div></div>
+      <div class="metric"><div class="label">Next maintenance</div><div class="number" id="next-date">—</div><div class="note">Upcoming sample job</div></div>
     </div>
     <div class="cols">
-      <div class="card"><h2>General motor health · 7-day sample trend</h2><svg class="chart" viewBox="0 0 600 170" preserveAspectRatio="none" aria-label="Illustrative fleet vibration trend"><g><line x1="34" y1="25" x2="590" y2="25"/><line x1="34" y1="65" x2="590" y2="65"/><line x1="34" y1="105" x2="590" y2="105"/><line x1="34" y1="145" x2="590" y2="145"/></g><path class="area" d="M35 112 L115 107 L195 115 L275 89 L355 97 L435 75 L515 83 L590 69 L590 155 L35 155Z"/><path d="M35 112 L115 107 L195 115 L275 89 L355 97 L435 75 L515 83 L590 69"/></svg><div class="axis"><span>7 days ago</span><span>Today · vibration (mm/s)</span></div></div>
-      <div class="card"><h2>Priority warnings</h2><div id="alerts"></div></div>
+      <div class="card"><h2>Overall machine health · sample trend</h2><div id="fleet-chart"></div></div>
+      <div class="card"><h2>Priority alerts</h2><div id="alerts"></div></div>
     </div>
-    <div class="card"><h2>Next planned maintenance</h2><div class="table-wrap"><table><thead><tr><th>Due</th><th>Crane</th><th>Motor</th><th>Work</th></tr></thead><tbody id="jobs"></tbody></table></div></div>
+    <div class="card"><h2>Planned maintenance</h2><div class="table-wrap"><table><thead><tr><th>Due</th><th>Machine</th><th>Work</th><th>Status</th></tr></thead><tbody id="jobs"></tbody></table></div></div>
   </section>
-  <section id="crane-view" class="hidden"></section><section id="motor-view" class="hidden"></section>
-  <div class="footer">Interface prototype only · placeholder asset IDs, readings, alerts, and dates.<br>Project contact: <a href="mailto:project-email@example.com">project-email@example.com</a></div>
-</main></div>
+  <section id="machine-view" class="hidden"></section>
+  <div class="footer">Interface prototype only · all machine names, readings, alerts, and dates are illustrative.<br>Project contact: <a href="mailto:project-email@example.com">project-email@example.com</a></div>
+</main>
+</div>
 <script>
-const fleet=[
- {id:"RTG-01",type:"RTG",motors:[
-  {id:"RTG01-H01",name:"Hoist motor",temp:66,current:40,vib:5.4,state:"Inspect",due:"2026-11-02",work:"Inspect bearing; review vibration",trend:[3.1,3.4,3.3,4.0,4.4,4.9,5.4]},
-  {id:"RTG01-T01",name:"Trolley motor",temp:55,current:29,vib:2.2,state:"Normal",due:"2026-11-12",work:"Routine condition check",trend:[2.1,2.2,2.0,2.1,2.3,2.2,2.2]},
-  {id:"RTG01-G01",name:"Gantry motor",temp:57,current:33,vib:2.6,state:"Normal",due:"2026-11-18",work:"Lubrication check",trend:[2.3,2.5,2.4,2.5,2.7,2.6,2.6]}]},
- {id:"RTG-02",type:"RTG",motors:[
-  {id:"RTG02-H01",name:"Hoist motor",temp:58,current:35,vib:2.8,state:"Normal",due:"2026-11-15",work:"Routine inspection",trend:[2.7,2.8,2.7,2.9,2.8,2.8,2.8]},
-  {id:"RTG02-T01",name:"Trolley motor",temp:74,current:43,vib:4.1,state:"Monitor",due:"2026-11-05",work:"Check cooling path and load history",trend:[3.1,3.0,3.3,3.4,3.7,3.9,4.1]},
-  {id:"RTG02-G01",name:"Gantry motor",temp:56,current:32,vib:2.5,state:"Normal",due:"2026-11-20",work:"Routine condition check",trend:[2.5,2.4,2.5,2.4,2.6,2.5,2.5]}]},
- {id:"STS-01",type:"STS",motors:[
-  {id:"STS01-H01",name:"Hoist motor",temp:62,current:39,vib:3.1,state:"Normal",due:"2026-11-09",work:"Routine inspection",trend:[2.9,3.0,3.1,3.0,3.2,3.1,3.1]},
-  {id:"STS01-T01",name:"Trolley motor",temp:60,current:37,vib:2.9,state:"Normal",due:"2026-11-17",work:"Routine condition check",trend:[2.8,2.8,2.9,3.0,2.9,2.8,2.9]},
-  {id:"STS01-G01",name:"Gantry motor",temp:59,current:36,vib:2.7,state:"Normal",due:"2026-11-22",work:"Lubrication check",trend:[2.7,2.6,2.7,2.8,2.7,2.7,2.7]}]},
- {id:"STS-02",type:"STS",motors:[
-  {id:"STS02-H01",name:"Hoist motor",temp:63,current:41,vib:3.3,state:"Normal",due:"2026-11-11",work:"Routine inspection",trend:[3.0,3.1,3.2,3.0,3.2,3.3,3.3]},
-  {id:"STS02-T01",name:"Trolley motor",temp:69,current:42,vib:6.2,state:"Inspect",due:"2026-11-03",work:"Review vibration; inspect bearing",trend:[3.6,3.9,3.7,4.5,4.9,5.6,6.2]},
-  {id:"STS02-G01",name:"Gantry motor",temp:57,current:34,vib:2.4,state:"Normal",due:"2026-11-24",work:"Routine condition check",trend:[2.4,2.5,2.4,2.3,2.5,2.4,2.4]}]}
+const machines=[
+ {id:1,temp:72,current:41,vib:5.4,state:"Inspect",due:"2026-11-02",work:"Inspect bearing and review vibration trend",trend:[3.1,3.4,3.3,4.0,4.4,4.9,5.4]},
+ {id:2,temp:58,current:35,vib:2.8,state:"Normal",due:"2026-11-05",work:"Routine condition check",trend:[2.7,2.8,2.7,2.9,2.8,2.8,2.8]},
+ {id:3,temp:77,current:46,vib:4.1,state:"Monitor",due:"2026-11-07",work:"Review cooling and operating load",trend:[3.1,3.0,3.3,3.4,3.7,3.9,4.1]},
+ {id:4,temp:61,current:38,vib:3.1,state:"Normal",due:"2026-11-10",work:"Routine inspection",trend:[2.9,3.0,3.1,3.0,3.2,3.1,3.1]},
+ {id:5,temp:68,current:42,vib:6.2,state:"Inspect",due:"2026-11-03",work:"Inspect bearing and review vibration trend",trend:[3.6,3.9,3.7,4.5,4.9,5.6,6.2]},
+ {id:6,temp:56,current:34,vib:2.4,state:"Normal",due:"2026-11-12",work:"Routine maintenance check",trend:[2.4,2.5,2.4,2.3,2.5,2.4,2.4]}
 ];
-let selectedCrane=null;const $=id=>document.getElementById(id);const all=()=>fleet.flatMap(c=>c.motors.map(m=>({...m,crane:c.id})));const date=s=>new Date(s+"T12:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
-function status(s){return `<span class="status ${s==="Inspect"?"bad":s==="Monitor"?"warn":""}">${s}</span>`}
-function setView(name,title,subtitle,eyebrow){["overview","crane","motor"].forEach(v=>$(v+"-view").classList.toggle("hidden",v!==name));$("title").textContent=title;$("subtitle").textContent=subtitle;$("eyebrow").textContent=eyebrow;$("overview-button").classList.toggle("active",name==="overview")}
-function draw(values){const points=values.map((v,i)=>`${i?"L":"M"}${35+i*555/(values.length-1)} ${145-(v/8)*115}`).join(" ");return `<svg class="chart" viewBox="0 0 600 170" preserveAspectRatio="none"><g><line x1="34" y1="25" x2="590" y2="25"/><line x1="34" y1="65" x2="590" y2="65"/><line x1="34" y1="105" x2="590" y2="105"/><line x1="34" y1="145" x2="590" y2="145"/></g><path class="area" d="${points} L590 155 L35 155Z"/><path d="${points}"/></svg><div class="axis"><span>7 days ago</span><span>Today · vibration (mm/s)</span></div>`}
-function nav(){ $("cranes").innerHTML=fleet.map(c=>`<button class="crane ${selectedCrane===c.id?"active":""}" data-id="${c.id}"><span>${c.id}<small>${c.type} · 3 sample motors</small></span><i class="dot ${c.motors.some(m=>m.state==="Inspect")?"warn":""}"></i></button>`).join("");document.querySelectorAll(".crane").forEach(b=>b.onclick=()=>showCrane(b.dataset.id))}
-function showOverview(){selectedCrane=null;nav();setView("overview","Fleet overview","See priority warnings and the next planned maintenance across the demo fleet.","Fleet monitoring");const flagged=all().filter(m=>m.state!=="Normal").sort((a,b)=>(a.state==="Inspect"?0:1)-(b.state==="Inspect"?0:1));$("alerts").innerHTML=flagged.map(m=>`<button class="alert ${m.state==="Inspect"?"critical":""}" data-crane="${m.crane}" data-motor="${m.id}"><strong>${m.crane} · ${m.name} · ${m.state}</strong><p>${m.state==="Inspect"?"Vibration trend is above the example baseline.":"Review temperature and operating history."}</p></button>`).join("");document.querySelectorAll(".alert").forEach(b=>b.onclick=()=>showMotor(b.dataset.crane,b.dataset.motor));$("jobs").innerHTML=all().sort((a,b)=>a.due.localeCompare(b.due)).slice(0,5).map(m=>`<tr><td>${date(m.due)}</td><td><button class="link" data-crane="${m.crane}" data-motor="${m.id}">${m.crane}</button></td><td>${m.name}</td><td>${m.work}</td></tr>`).join("");document.querySelectorAll(".link").forEach(b=>b.onclick=()=>showMotor(b.dataset.crane,b.dataset.motor))}
-function showCrane(id){selectedCrane=id;nav();const c=fleet.find(x=>x.id===id);setView("crane",`${id} · motors`,`Select a motor to view its readings, sample graph, and maintenance.",`${c.type} crane`);$("crane-view").innerHTML=`<button class="back" id="back">← Fleet overview</button><div class="motors">${c.motors.map(m=>`<article class="motor" tabindex="0" data-id="${m.id}"><div style="display:flex;justify-content:space-between;gap:6px"><h3>${m.name}</h3>${status(m.state)}</div><div class="motor-id">Placeholder asset ${m.id}</div><div class="readings"><div>Temperature<b>${m.temp} °C</b></div><div>Current<b>${m.current} A</b></div><div>Vibration<b>${m.vib} mm/s</b></div></div><div class="note" style="margin-top:10px">Next service: ${date(m.due)}</div></article>`).join("")}</div><div class="cols"><div class="card"><h2>Motor health snapshot</h2>${draw(c.motors.map(m=>m.vib))}</div><div class="card"><h2>Crane warnings</h2>${c.motors.filter(m=>m.state!=="Normal").map(m=>`<div class="alert ${m.state==="Inspect"?"critical":""}"><strong>${m.name} · ${m.state}</strong><p>Illustrative condition flag for the demo.</p></div>`).join("")||"<p class='subtitle'>No sample warnings for this crane.</p>"}</div></div>`;$("back").onclick=showOverview;document.querySelectorAll(".motor").forEach(m=>{m.onclick=()=>showMotor(id,m.dataset.id);m.onkeydown=e=>{if(e.key==="Enter")showMotor(id,m.dataset.id)}})}
-function showMotor(craneId,motorId){selectedCrane=craneId;nav();const c=fleet.find(x=>x.id===craneId),m=c.motors.find(x=>x.id===motorId);setView("motor",m.name,`${c.id} · placeholder asset ${m.id}`,"Motor detail");$("motor-view").innerHTML=`<button class="back" id="back">← ${c.id} motor list</button><div class="metrics"><div class="metric"><div class="label">Temperature</div><div class="number">${m.temp} <span class="unit">°C</span></div><div class="note">Sample motor casing reading</div></div><div class="metric"><div class="label">Current</div><div class="number">${m.current} <span class="unit">A</span></div><div class="note">Sample operating current</div></div><div class="metric"><div class="label">Vibration RMS</div><div class="number">${m.vib} <span class="unit">mm/s</span></div><div class="note">Sample sensor reading</div></div><div class="metric"><div class="label">Condition</div><div class="number" style="font-size:17px">${status(m.state)}</div><div class="note">Example status only</div></div></div><div class="cols"><div class="card"><h2>Vibration trend · 7 days</h2>${draw(m.trend)}<p class="subtitle">Example graph only. Real thresholds need agreed KPA baselines and operating context.</p></div><div class="card"><h2>Next planned maintenance</h2><div class="maintenance"><div><small>DUE DATE</small><b>${date(m.due)}</b></div><div><small>WORK ITEM</small><b>${m.work}</b></div><div><small>DATA SOURCE</small><b>Sample only</b></div></div><hr style="border:0;border-top:1px solid var(--line);margin:14px 0"><h2>Warning</h2><p class="subtitle">${m.state=== "Normal"?"No sample warning is shown.":"This example motor is flagged for review."} This is not connected to equipment.</p></div></div>`;$("back").onclick=()=>showCrane(c.id)}
-$("overview-button").onclick=showOverview;showOverview();
+const $=id=>document.getElementById(id);
+const date=value=>new Date(value+"T12:00:00").toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+function status(value){return '<span class="status '+(value==="Inspect"?"bad":value==="Monitor"?"warn":"")+'">'+value+'</span>'}
+function chart(values,label){
+ const points=values.map((v,i)=>(i?"L":"M")+(35+i*555/(values.length-1))+" "+(145-(v/8)*115)).join(" ");
+ return '<svg class="chart" viewBox="0 0 600 170" preserveAspectRatio="none" role="img" aria-label="'+label+'"><g><line x1="34" y1="25" x2="590" y2="25"/><line x1="34" y1="65" x2="590" y2="65"/><line x1="34" y1="105" x2="590" y2="105"/><line x1="34" y1="145" x2="590" y2="145"/></g><path class="area" d="'+points+' L590 155 L35 155Z"/><path d="'+points+'"/></svg><div class="axis"><span>7 days ago</span><span>Today · vibration (mm/s)</span></div>';
+}
+function showOverview(){
+ $("overview-view").classList.remove("hidden");$("machine-view").classList.add("hidden");
+ $("title").textContent="Overview";$("eyebrow").textContent="Machine monitoring";
+ $("subtitle").textContent="A single view of machine condition, priority alerts, and upcoming maintenance.";
+ $("machine-menu").value="";$("home-link").classList.add("active");
+ const flagged=machines.filter(m=>m.state!=="Normal");
+ $("healthy-count").textContent=machines.filter(m=>m.state==="Normal").length;
+ $("attention-count").textContent=flagged.length;
+ $("next-date").textContent=date(machines.slice().sort((a,b)=>a.due.localeCompare(b.due))[0].due).split(" ")[0];
+ $("fleet-chart").innerHTML=chart([3.1,3.4,3.6,3.8,4.2,4.4,4.6],"Illustrative overall machine vibration trend");
+ $("alerts").innerHTML=flagged.map(m=>'<button class="alert '+(m.state==="Inspect"?"critical":"")+'" data-machine="'+m.id+'"><strong>Machine '+m.id+' · '+m.state+'</strong><p>'+(m.state==="Inspect"?"Vibration trend is above the sample baseline.":"Review temperature and operating history.")+'</p></button>').join("");
+ document.querySelectorAll(".alert").forEach(button=>button.onclick=()=>showMachine(Number(button.dataset.machine)));
+ $("jobs").innerHTML=machines.slice().sort((a,b)=>a.due.localeCompare(b.due)).map(m=>'<tr><td>'+date(m.due)+'</td><td><button class="link" data-machine="'+m.id+'">Machine '+m.id+'</button></td><td>'+m.work+'</td><td>'+status(m.state)+'</td></tr>').join("");
+ document.querySelectorAll(".link").forEach(button=>button.onclick=()=>showMachine(Number(button.dataset.machine)));
+}
+function showMachine(id){
+ const m=machines.find(item=>item.id===id);if(!m)return;
+ $("overview-view").classList.add("hidden");$("machine-view").classList.remove("hidden");
+ $("home-link").classList.remove("active");$("machine-menu").value=String(id);
+ $("eyebrow").textContent="Machine detail";$("title").textContent="Machine "+id;
+ $("subtitle").textContent="Condition readings and maintenance information for this sample machine.";
+ $("machine-view").innerHTML=
+ '<div class="machine-detail"><div class="reading"><div class="label">Temperature</div><strong>'+m.temp+' °C</strong><div class="note">Sample sensor reading</div></div>'+
+ '<div class="reading"><div class="label">Current</div><strong>'+m.current+' A</strong><div class="note">Sample operating current</div></div>'+
+ '<div class="reading"><div class="label">Vibration</div><strong>'+m.vib+' mm/s</strong><div class="note">Sample vibration reading</div></div></div>'+
+ '<div class="metrics"><div class="metric"><div class="label">Condition</div><div class="number" style="font-size:17px">'+status(m.state)+'</div><div class="note">Example status only</div></div><div class="metric"><div class="label">Next maintenance</div><div class="number" style="font-size:18px">'+date(m.due)+'</div><div class="note">'+m.work+'</div></div></div>'+
+ '<div class="cols"><div class="card"><h2>Vibration trend · 7 days</h2>'+chart(m.trend,"Machine "+id+" illustrative vibration trend")+'<p class="subtitle">Example graph only. Real thresholds require machine-specific operating context.</p></div>'+
+ '<div class="card"><h2>Maintenance notes</h2><p>'+m.work+'.</p><p class="subtitle">All readings and recommendations here are fictional sample content, not live equipment data.</p><button class="nav-link" style="background:var(--navy);width:auto" id="return-home">← Return to Home overview</button></div></div>';
+ $("return-home").onclick=showOverview;
+}
+$("machine-menu").addEventListener("change",event=>event.target.value?showMachine(Number(event.target.value)):showOverview());
+$("home-link").addEventListener("click",event=>{event.preventDefault();showOverview()});
+showOverview();
 </script>
 </body>
 </html>
-
-
