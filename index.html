@@ -51,24 +51,27 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
 .footer a{color:var(--teal);font-weight:700;text-decoration:none}.footer a:hover{text-decoration:underline}
 .hidden{display:none!important}
 @media(max-width:850px){.layout{grid-template-columns:205px 1fr}.metrics{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
-@media(max-width:600px){.layout{grid-template-columns:1fr}aside{padding:12px}.brand{padding:3px 7px 11px}.nav-title{margin-top:10px}.side-note{margin-top:12px;padding-top:8px}main{padding:16px 11px}.top{align-items:flex-start}h1{font-size:20px}.pill{font-size:8px}.metrics{gap:7px}.metric,.card{padding:11px}.machine-detail{grid-template-columns:1fr}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}}
+@media(max-width:760px){.layout{display:block}aside{display:block;padding:12px 14px}.brand{padding:3px 7px 10px}.primary-nav{display:flex;flex-direction:row;align-items:center;flex-wrap:wrap;gap:5px;padding-top:9px}.primary-nav .nav-title{display:none}.primary-nav .nav-link{width:auto;margin:0;padding:8px 9px}.machine-select{width:auto;flex:1 1 145px;min-width:130px;padding:9px}.nav-secondary{display:flex;flex-direction:row;gap:2px}.nav-secondary .nav-link{font-size:12px}.side-note{display:none}main{padding:15px 12px}.top{align-items:flex-start}h1{font-size:20px}.pill{font-size:8px;white-space:normal;text-align:center}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.metric,.card{padding:11px}.cols{grid-template-columns:1fr}.machine-detail{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.reading{padding:9px}.reading strong{font-size:17px}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}table{min-width:0;table-layout:fixed}th,td{padding:7px 4px;overflow-wrap:anywhere}th:first-child,td:first-child{width:72px}th:nth-child(2),td:nth-child(2){width:78px}th:last-child,td:last-child{display:none}}
+@media(max-width:380px){.machine-detail{grid-template-columns:1fr}.nav-secondary{margin-left:auto}.number{font-size:21px}}
 </style>
 </head>
 <body>
 <div class="layout">
 <aside>
   <div class="brand">Machine Health Monitor<small>CONDITION MONITORING DEMO</small></div>
-  <div class="nav-title">MENU</div>
-  <a class="nav-link active" id="home-link" href="index.html">⌂ &nbsp; Home</a>
-  <label class="nav-title" for="machine-menu">MACHINES</label>
-  <select class="machine-select" id="machine-menu" aria-label="Select a machine">
-    <option value="">Choose a machine…</option>
-    <option value="1">Machine 1</option><option value="2">Machine 2</option><option value="3">Machine 3</option>
-    <option value="4">Machine 4</option><option value="5">Machine 5</option><option value="6">Machine 6</option>
-  </select>
-  <div class="nav-title">INFORMATION</div>
-  <a class="nav-link" href="about.html">About</a>
-  <a class="nav-link" href="contact.html">Contact</a>
+  <nav class="primary-nav" aria-label="Main menu">
+    <a class="nav-link active" id="home-link" href="index.html">⌂ &nbsp; Home</a>
+    <label class="nav-title" for="machine-menu">MACHINES</label>
+    <select class="machine-select" id="machine-menu" aria-label="Select a machine">
+      <option value="">Choose a machine…</option>
+      <option value="1">Machine 1</option><option value="2">Machine 2</option><option value="3">Machine 3</option>
+      <option value="4">Machine 4</option><option value="5">Machine 5</option><option value="6">Machine 6</option>
+    </select>
+    <div class="nav-secondary">
+      <a class="nav-link" href="about.html">About</a>
+      <a class="nav-link" href="contact.html">Contact</a>
+    </div>
+  </nav>
   <div class="side-note"><b>SAMPLE DATA · NOT LIVE</b><br>Illustrative machine readings only. No equipment is connected.</div>
 </aside>
 <main>
