@@ -1,0 +1,211 @@
+const http = require('node:http');
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const crypto = require('node:crypto');
+
+const ROOT = __dirname;
+const DATA_DIR = path.join(ROOT, 'data');
+const READINGS_FILE = path.join(DATA_DIR, 'readings.json');
+const HOST = process.env.HOST || '127.0.0.1';
+const PORT = Number(process.env.PORT || 3000);
+const MAX_BODY_BYTES = 16 * 1024;
+const MACHINE_IDS = new Set([1, 2, 3, 4, 5, 6]);
+const MIME_TYPES = {
+  '.html': 'text/html; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+};
+
+let writeQueue = Promise.resolve();
+
+async function readReadings() {
+  try {
+    return JSON.parse(await fs.readFile(READINGS_FILE, 'utf8'));
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(READINGS_FILE, '[]\n', 'utf8');
+    return [];
+  }
+}
+
+function persistReadings(readings) {
+  writeQueue = writeQueue.then(async () => {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    const temporaryFile = `${READINGS_FILE}.tmp`;
+    await fs.writeFile(temporaryFile, `${JSON.stringify(readings, null, 2)}\n`, 'utf8');
+    await fs.rename(temporaryFile, READINGS_FILE);
+  });
+  return writeQueue;
+}
+
+function sendJson(response, statusCode, body) {
+  response.writeHead(statusCode, {
+    'Content-Type': MIME_TYPES['.json'],
+    'Cache-Control': 'no-store',
+    'X-Content-Type-Options': 'nosniff',
+  });
+  response.end(JSON.stringify(body));
+}
+
+function getMachineToken(machineId) {
+  return process.env[`DEVICE_TOKEN_MACHINE_${machineId}`];
+}
+
+function hasValidDeviceToken(request, machineId) {
+  const expected = getMachineToken(machineId);
+  const supplied = request.headers.authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!expected || !supplied) return false;
+  const expectedBytes = Buffer.from(expected);
+  const suppliedBytes = Buffer.from(supplied);
+  return expectedBytes.length === suppliedBytes.length && crypto.timingSafeEqual(expectedBytes, suppliedBytes);
+}
+
+function readJsonBody(request) {
+  return new Promise((resolve, reject) => {
+    let body = '';
+    request.setEncoding('utf8');
+    request.on('data', chunk => {
+      body += chunk;
+      if (Buffer.byteLength(body, 'utf8') > MAX_BODY_BYTES) {
+        reject(Object.assign(new Error('Request body is too large.'), { statusCode: 413 }));
+        request.destroy();
+      }
+    });
+    request.on('end', () => {
+      try {
+        resolve(JSON.parse(body));
+      } catch {
+        reject(Object.assign(new Error('Send a valid JSON request body.'), { statusCode: 400 }));
+      }
+    });
+    request.on('error', reject);
+  });
+}
+
+function validateReading(body) {
+  const machineId = Number(body.machineId);
+  const motorId = typeof body.motorId === 'string' ? body.motorId.trim() : '';
+  const temperatureC = Number(body.temperatureC);
+  const currentA = Number(body.currentA);
+  const vibrationMmS = Number(body.vibrationMmS);
+  const timestamp = body.timestamp === undefined ? new Date().toISOString() : body.timestamp;
+  const issues = [];
+
+  if (!MACHINE_IDS.has(machineId)) issues.push('machineId must be a number from 1 to 6.');
+  if (!motorId || motorId.length > 64) issues.push('motorId is required and must be 64 characters or fewer.');
+  if (!Number.isFinite(temperatureC) || temperatureC < -40 || temperatureC > 250) issues.push('temperatureC must be between -40 and 250.');
+  if (!Number.isFinite(currentA) || currentA < 0 || currentA > 10000) issues.push('currentA must be between 0 and 10000.');
+  if (!Number.isFinite(vibrationMmS) || vibrationMmS < 0 || vibrationMmS > 1000) issues.push('vibrationMmS must be between 0 and 1000.');
+  if (typeof timestamp !== 'string' || !Number.isFinite(Date.parse(timestamp))) issues.push('timestamp must be a valid date-time string.');
+
+  if (issues.length) return { issues };
+  return {
+    value: {
+      id: crypto.randomUUID(),
+      machineId,
+      motorId,
+      temperatureC,
+      currentA,
+      vibrationMmS,
+      timestamp: new Date(timestamp).toISOString(),
+      receivedAt: new Date().toISOString(),
+    },
+  };
+}
+
+async function handleApi(request, response, url) {
+  if (request.method === 'GET' && url.pathname === '/api/health') {
+    return sendJson(response, 200, { ok: true, service: 'motor-condition-monitoring-api' });
+  }
+
+  if (request.method === 'GET' && url.pathname === '/api/v1/machines') {
+    const readings = await readReadings();
+    const machines = [...MACHINE_IDS].map(id => {
+      const machineReadings = readings.filter(reading => reading.machineId === id);
+      const latestByMotor = new Map();
+      for (const reading of machineReadings.sort((a, b) => b.timestamp.localeCompare(a.timestamp))) {
+        if (!latestByMotor.has(reading.motorId)) latestByMotor.set(reading.motorId, reading);
+      }
+      return {
+        id,
+        name: `Machine ${id}`,
+        motorsReporting: [...latestByMotor.keys()].length,
+        latestReadings: [...latestByMotor.values()],
+      };
+    });
+    return sendJson(response, 200, { machines });
+  }
+
+  const machineReadingsMatch = url.pathname.match(/^\/api\/v1\/machines\/([1-6])\/readings$/);
+  if (request.method === 'GET' && machineReadingsMatch) {
+    const machineId = Number(machineReadingsMatch[1]);
+    const limitValue = Number(url.searchParams.get('limit') || 100);
+    if (!Number.isInteger(limitValue) || limitValue < 1 || limitValue > 500) {
+      return sendJson(response, 400, { error: 'limit must be a whole number from 1 to 500.' });
+    }
+    const readings = await readReadings();
+    const filtered = readings
+      .filter(reading => reading.machineId === machineId)
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+      .slice(0, limitValue);
+    return sendJson(response, 200, { machineId, readings: filtered });
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/v1/readings') {
+    const body = await readJsonBody(request);
+    const machineId = Number(body.machineId);
+    if (!MACHINE_IDS.has(machineId)) {
+      return sendJson(response, 400, { error: 'machineId must be a number from 1 to 6.' });
+    }
+    if (!getMachineToken(machineId)) {
+      return sendJson(response, 503, { error: `DEVICE_TOKEN_MACHINE_${machineId} is not set on this server.` });
+    }
+    if (!hasValidDeviceToken(request, machineId)) {
+      return sendJson(response, 401, { error: 'A valid bearer token for this machine is required.' });
+    }
+    const result = validateReading(body);
+    if (result.issues) return sendJson(response, 400, { error: 'Reading is invalid.', issues: result.issues });
+
+    const readings = await readReadings();
+    readings.push(result.value);
+    await persistReadings(readings);
+    return sendJson(response, 201, { saved: true, reading: result.value });
+  }
+
+  return sendJson(response, 404, { error: 'API route not found.' });
+}
+
+async function handleRequest(request, response) {
+  const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
+  try {
+    if (url.pathname.startsWith('/api/')) return await handleApi(request, response, url);
+    if (request.method !== 'GET' && request.method !== 'HEAD') {
+      return sendJson(response, 405, { error: 'Only GET and HEAD are supported for website files.' });
+    }
+
+    const requestedPath = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
+    const filePath = path.resolve(ROOT, `.${requestedPath}`);
+    if (!filePath.startsWith(`${ROOT}${path.sep}`) || filePath.startsWith(`${DATA_DIR}${path.sep}`)) {
+      return sendJson(response, 403, { error: 'File access denied.' });
+    }
+    const contents = await fs.readFile(filePath);
+    response.writeHead(200, {
+      'Content-Type': MIME_TYPES[path.extname(filePath).toLowerCase()] || 'application/octet-stream',
+      'X-Content-Type-Options': 'nosniff',
+    });
+    response.end(request.method === 'HEAD' ? undefined : contents);
+  } catch (error) {
+    if (error.statusCode) return sendJson(response, error.statusCode, { error: error.message });
+    if (error.code === 'ENOENT') return sendJson(response, 404, { error: 'Page or file not found.' });
+    console.error(error);
+    sendJson(response, 500, { error: 'Unexpected server error.' });
+  }
+}
+
+http.createServer(handleRequest).listen(PORT, HOST, () => {
+  console.log(`Motor monitoring prototype running at http://${HOST}:${PORT}`);
+  console.log('Local prototype only. Do not expose this server directly to the public internet.');
+});
