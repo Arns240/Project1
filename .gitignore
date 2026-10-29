@@ -1,2 +1,6 @@
+data/
 data/readings.json
 data/readings.json.tmp
+node_modules/
+.netlify/
+.env

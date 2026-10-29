@@ -4,6 +4,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 
 const ROOT = __dirname;
+const PUBLIC_DIR = path.join(ROOT, 'public');
 const DATA_DIR = path.join(ROOT, 'data');
 const READINGS_FILE = path.join(DATA_DIR, 'readings.json');
 const HOST = process.env.HOST || '127.0.0.1';
@@ -31,12 +32,18 @@ async function readReadings() {
   }
 }
 
-function persistReadings(readings) {
-  writeQueue = writeQueue.then(async () => {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    const temporaryFile = `${READINGS_FILE}.tmp`;
-    await fs.writeFile(temporaryFile, `${JSON.stringify(readings, null, 2)}\n`, 'utf8');
-    await fs.rename(temporaryFile, READINGS_FILE);
+async function writeReadings(readings) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  const temporaryFile = `${READINGS_FILE}.tmp`;
+  await fs.writeFile(temporaryFile, `${JSON.stringify(readings, null, 2)}\n`, 'utf8');
+  await fs.rename(temporaryFile, READINGS_FILE);
+}
+
+function persistReading(reading) {
+  writeQueue = writeQueue.catch(() => {}).then(async () => {
+    const readings = await readReadings();
+    readings.push(reading);
+    await writeReadings(readings);
   });
   return writeQueue;
 }
@@ -169,9 +176,7 @@ async function handleApi(request, response, url) {
     const result = validateReading(body);
     if (result.issues) return sendJson(response, 400, { error: 'Reading is invalid.', issues: result.issues });
 
-    const readings = await readReadings();
-    readings.push(result.value);
-    await persistReadings(readings);
+    await persistReading(result.value);
     return sendJson(response, 201, { saved: true, reading: result.value });
   }
 
@@ -187,8 +192,8 @@ async function handleRequest(request, response) {
     }
 
     const requestedPath = decodeURIComponent(url.pathname === '/' ? '/index.html' : url.pathname);
-    const filePath = path.resolve(ROOT, `.${requestedPath}`);
-    if (!filePath.startsWith(`${ROOT}${path.sep}`) || filePath.startsWith(`${DATA_DIR}${path.sep}`)) {
+    const filePath = path.resolve(PUBLIC_DIR, `.${requestedPath}`);
+    if (!filePath.startsWith(`${PUBLIC_DIR}${path.sep}`)) {
       return sendJson(response, 403, { error: 'File access denied.' });
     }
     const contents = await fs.readFile(filePath);
