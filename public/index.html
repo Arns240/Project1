@@ -50,14 +50,56 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
 .footer{color:#8d99a5;font-size:9px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
 .footer a{color:var(--teal);font-weight:700;text-decoration:none}.footer a:hover{text-decoration:underline}
 .hidden{display:none!important}
+.auth-gate{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(140deg,#112942,#1c4564)}
+.auth-card{width:min(420px,100%);padding:28px;background:#fff;border-radius:14px;box-shadow:0 20px 55px #07182755}
+.auth-card h1{font-size:22px;margin:6px 0}.auth-card p{color:var(--muted);font-size:12px}
+.auth-card label{display:block;margin:14px 0 5px;font-size:11px;font-weight:700;color:var(--ink)}
+.auth-card input{width:100%;padding:11px;border:1px solid var(--line);border-radius:7px;font:inherit}
+.auth-card input:focus{outline:2px solid var(--teal);outline-offset:1px}
+.auth-submit,.sign-out{border:0;border-radius:7px;background:var(--navy);color:#fff;padding:10px 14px;font:inherit;font-weight:700;cursor:pointer}
+.auth-submit{width:100%;margin-top:18px}.auth-submit:disabled{opacity:.6;cursor:wait}
+.auth-link{display:block;margin:10px auto 0;border:0;background:transparent;color:var(--teal);font:inherit;font-size:11px;font-weight:700;cursor:pointer}
+.auth-link:disabled{opacity:.6;cursor:wait}
+.auth-error{padding:9px 10px;margin-top:12px;border:1px solid #efcfcb;border-radius:7px;background:#fff5f4;color:#9d3730;font-size:11px}
+.auth-success{padding:9px 10px;margin-top:12px;border:1px solid #c7e7dc;border-radius:7px;background:#f0faf6;color:#176c58;font-size:11px}
+.auth-note{font-size:10px!important;margin-top:18px}
+.top-actions{display:flex;align-items:center;gap:9px}.account-email{font-size:10px;color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.data-message{margin:0 0 12px;padding:10px 12px;border-radius:7px;border:1px solid #efd9ae;background:#fff9ee;color:#80551a;font-size:11px}
 .mobile-menu-toggle{display:none}
 @media(max-width:850px){.layout{grid-template-columns:205px 1fr}.metrics{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
-@media(max-width:760px){.layout{display:block}aside{display:block;position:relative;padding:12px 14px}.brand{padding:3px 7px 10px 51px;min-height:43px}.mobile-menu-toggle{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:5px;top:13px;left:14px;width:38px;height:36px;padding:8px;border:1px solid #527087;border-radius:7px;background:#193851;cursor:pointer}.mobile-menu-toggle span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}.mobile-menu-toggle:focus-visible{outline:2px solid #52c8ba;outline-offset:2px}.primary-nav{display:none;position:absolute;z-index:10;top:58px;left:14px;width:min(280px,calc(100vw - 28px));padding:10px;background:var(--navy);border:1px solid #527087;border-radius:10px;box-shadow:0 12px 28px #07182766;flex-direction:column;align-items:stretch;gap:4px}.primary-nav.open{display:flex}.primary-nav .nav-title{display:block;margin:12px 9px 5px}.primary-nav .nav-link{width:100%;margin:0;padding:10px}.machine-select{width:100%;min-width:0;padding:10px}.nav-secondary{display:flex;flex-direction:column;gap:4px}.nav-secondary .nav-link{font-size:14px}.side-note{display:none}main{padding:15px 12px}.top{align-items:flex-start}h1{font-size:20px}.pill{font-size:8px;white-space:normal;text-align:center}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.metric,.card{padding:11px}.cols{grid-template-columns:1fr}.machine-detail{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.reading{padding:9px}.reading strong{font-size:17px}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}table{min-width:0;table-layout:fixed}th,td{padding:7px 4px;overflow-wrap:anywhere}th:first-child,td:first-child{width:72px}th:nth-child(2),td:nth-child(2){width:78px}th:last-child,td:last-child{display:none}}
+@media(max-width:760px){.layout{display:block}aside{display:block;position:relative;padding:12px 14px}.brand{padding:3px 7px 10px 51px;min-height:43px}.mobile-menu-toggle{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:5px;top:13px;left:14px;width:38px;height:36px;padding:8px;border:1px solid #527087;border-radius:7px;background:#193851;cursor:pointer}.mobile-menu-toggle span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}.mobile-menu-toggle:focus-visible{outline:2px solid #52c8ba;outline-offset:2px}.primary-nav{display:none;position:absolute;z-index:10;top:58px;left:14px;width:min(280px,calc(100vw - 28px));padding:10px;background:var(--navy);border:1px solid #527087;border-radius:10px;box-shadow:0 12px 28px #07182766;flex-direction:column;align-items:stretch;gap:4px}.primary-nav.open{display:flex}.primary-nav .nav-title{display:block;margin:12px 9px 5px}.primary-nav .nav-link{width:100%;margin:0;padding:10px}.machine-select{width:100%;min-width:0;padding:10px}.nav-secondary{display:flex;flex-direction:column;gap:4px}.nav-secondary .nav-link{font-size:14px}.side-note{display:none}main{padding:15px 12px}.top{align-items:flex-start}.top-actions{flex-wrap:wrap;justify-content:flex-end;gap:6px}.account-email{max-width:125px}h1{font-size:20px}.pill{font-size:8px;white-space:normal;text-align:center}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.metric,.card{padding:11px}.cols{grid-template-columns:1fr}.machine-detail{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.reading{padding:9px}.reading strong{font-size:17px}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}table{min-width:0;table-layout:fixed}th,td{padding:7px 4px;overflow-wrap:anywhere}th:first-child,td:first-child{width:72px}th:nth-child(2),td:nth-child(2){width:78px}th:last-child,td:last-child{display:none}}
 @media(max-width:380px){.machine-detail{grid-template-columns:1fr}.nav-secondary{margin-left:auto}.number{font-size:21px}}
 </style>
 </head>
 <body>
-<div class="layout">
+<section class="auth-gate" id="auth-gate" aria-label="Engineer sign-in">
+  <form class="auth-card" id="login-form">
+    <div class="eyebrow">Restricted dashboard</div>
+    <h1>Engineer sign-in</h1>
+    <p>Sign in with an account issued by the project administrator.</p>
+    <label for="login-email">Email</label>
+    <input id="login-email" name="email" type="email" autocomplete="username" required>
+    <label for="login-password">Password</label>
+    <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+    <div class="auth-error hidden" id="auth-error" role="alert"></div>
+    <div class="auth-success hidden" id="auth-success" role="status"></div>
+    <button class="auth-submit" id="login-submit" type="submit" disabled>Sign in</button>
+    <button class="auth-link" id="forgot-password" type="button" disabled>Forgot password?</button>
+    <p class="auth-note">Accounts are managed by the system administrator. Public sign-up is disabled.</p>
+  </form>
+  <form class="auth-card hidden" id="password-form">
+    <div class="eyebrow">Account setup</div>
+    <h1 id="password-title">Set your password</h1>
+    <p id="password-description">Choose a password to finish setting up your engineer account.</p>
+    <label for="new-password">New password</label>
+    <input id="new-password" type="password" autocomplete="new-password" minlength="8" required>
+    <label for="confirm-password">Confirm password</label>
+    <input id="confirm-password" type="password" autocomplete="new-password" minlength="8" required>
+    <div class="auth-error hidden" id="password-error" role="alert"></div>
+    <button class="auth-submit" id="password-submit" type="submit">Save password</button>
+  </form>
+</section>
+<div class="layout hidden" id="app-shell">
 <aside>
   <button class="mobile-menu-toggle" id="menu-toggle" type="button" aria-label="Open menu" aria-controls="primary-nav" aria-expanded="false"><span></span><span></span><span></span></button>
   <div class="brand">Machine Health Monitor<small>CONDITION MONITORING DEMO</small></div>
@@ -77,7 +119,8 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
   <div class="side-note" id="source-note"><b>SAMPLE DATA · NOT LIVE</b><br>Illustrative machine readings only. No equipment is connected.</div>
 </aside>
 <main>
-  <div class="top"><div><div class="eyebrow" id="eyebrow">Fleet monitoring</div><h1 id="title">Overview</h1><div class="subtitle" id="subtitle">A single view of machine condition, priority alerts, and upcoming maintenance.</div></div><span class="pill" id="data-badge">FICTIONAL SAMPLE READINGS</span></div>
+  <div class="top"><div><div class="eyebrow" id="eyebrow">Fleet monitoring</div><h1 id="title">Overview</h1><div class="subtitle" id="subtitle">A single view of machine condition, priority alerts, and upcoming maintenance.</div></div><div class="top-actions"><span class="pill" id="data-badge">AUTHENTICATED DATA</span><span class="account-email" id="account-email"></span><button class="sign-out" id="sign-out" type="button">Sign out</button></div></div>
+  <div class="data-message hidden" id="data-message" role="status"></div>
   <section id="overview-view">
     <div class="metrics">
       <div class="metric"><div class="label">Machines monitored</div><div class="number">6</div><div class="note">Demo equipment list</div></div>
@@ -113,9 +156,13 @@ const sampleMachines=[
  {id:6,temp:56,current:34,vib:2.4,state:"Normal",due:"2026-11-12",work:"Routine maintenance check",trend:[2.4,2.5,2.4,2.3,2.5,2.4,2.4]}
 ];
 let machines=sampleMachines;
-let dataMode="sample";
+let dataMode="live";
 let selectedMachine=null;
 let loadingLiveData=false;
+let authConfig=null;
+let authSession=null;
+let loadError="";
+const AUTH_SESSION_KEY="motor-monitoring-engineer-session";
 const $=id=>document.getElementById(id);
 const date=value=>new Date(value).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
 const dateTime=value=>new Date(value).toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
@@ -130,9 +177,9 @@ function chart(values,label,axisLabel="7 days ago"){
 }
 function updateSourceUI(){
  const live=dataMode==="live";
- $("source-note").innerHTML=live?"<b>LOCAL BACKEND · SENSOR DATA</b><br>Values below came from the local API. No alarm thresholds are configured.":"<b>SAMPLE DATA · NOT LIVE</b><br>Illustrative machine readings only. The local API is unavailable.";
- $("data-badge").textContent=live?"LOCAL BACKEND READINGS":"FICTIONAL SAMPLE READINGS";
- $("footer-note").innerHTML=live?"Local prototype · readings are displayed without condition classification or maintenance advice.<br>Project contact: <a href=\"mailto:project-email@example.com\">project-email@example.com</a>":"Interface prototype only · all machine names, readings, alerts, and dates are illustrative.<br>Project contact: <a href=\"mailto:project-email@example.com\">project-email@example.com</a>";
+ $("source-note").innerHTML=live?"<b>AUTHENTICATED · SENSOR DATA</b><br>Readings are available to signed-in engineers. No alarm thresholds are configured.":"<b>SAMPLE DATA · NOT LIVE</b><br>Illustrative machine readings only.";
+ $("data-badge").textContent=live?"AUTHENTICATED API DATA":"FICTIONAL SAMPLE READINGS";
+ $("footer-note").innerHTML=live?"Authenticated prototype · readings are displayed without condition classification or maintenance advice.<br>Project contact: <a href=\"mailto:project-email@example.com\">project-email@example.com</a>":"Interface prototype only · all machine names, readings, alerts, and dates are illustrative.<br>Project contact: <a href=\"mailto:project-email@example.com\">project-email@example.com</a>";
 }
 function showOverview(){
  selectedMachine=null;
@@ -140,6 +187,8 @@ function showOverview(){
  $("title").textContent="Overview";$("eyebrow").textContent="Machine monitoring";
  $("machine-menu").value="";$("home-link").classList.add("active");
  updateSourceUI();
+ $("data-message").textContent=loadError;
+ $("data-message").classList.toggle("hidden",!loadError);
  if(dataMode==="sample"){
   $("subtitle").textContent="A single view of machine condition, priority alerts, and upcoming maintenance.";
   $("healthy-label").textContent="Healthy";$("healthy-note").textContent="Based on illustrative data";
@@ -179,7 +228,7 @@ function showMachine(id){
  selectedMachine=id;
  $("overview-view").classList.add("hidden");$("machine-view").classList.remove("hidden");
  $("home-link").classList.remove("active");$("machine-menu").value=String(id);
- $("eyebrow").textContent=dataMode==="live"?"Local backend readings":"Sample machine detail";$("title").textContent="Machine "+id;
+ $("eyebrow").textContent=dataMode==="live"?"Authenticated server readings":"Sample machine detail";$("title").textContent="Machine "+id;
  if(dataMode==="sample"){
   $("subtitle").textContent="Condition readings and maintenance information for this sample machine.";
   $("machine-view").innerHTML='<div class="machine-detail"><div class="reading"><div class="label">Temperature</div><strong>'+m.temp+' °C</strong><div class="note">Sample sensor reading</div></div><div class="reading"><div class="label">Current</div><strong>'+m.current+' A</strong><div class="note">Sample operating current</div></div><div class="reading"><div class="label">Vibration</div><strong>'+m.vib+' mm/s</strong><div class="note">Sample vibration reading</div></div></div><div class="metrics"><div class="metric"><div class="label">Condition</div><div class="number" style="font-size:17px">'+status(m.state)+'</div><div class="note">Example status only</div></div><div class="metric"><div class="label">Next maintenance</div><div class="number" style="font-size:18px">'+date(m.due)+'</div><div class="note">'+escapeHtml(m.work)+'</div></div></div><div class="cols"><div class="card"><h2>Vibration trend · sample</h2>'+chart(m.trend,"Machine "+id+" illustrative vibration trend")+'<p class="subtitle">Example graph only. Real thresholds require machine-specific operating context.</p></div><div class="card"><h2>Maintenance notes</h2><p>'+escapeHtml(m.work)+'.</p><p class="subtitle">All readings and recommendations here are fictional sample content, not live equipment data.</p><button class="nav-link" style="background:var(--navy);width:auto" id="return-home">← Return to Home overview</button></div></div>';
@@ -194,35 +243,180 @@ function showMachine(id){
  }
  $("return-home").onclick=showOverview;
 }
+function readStoredSession(){
+ try{return JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY)||"null")}catch{return null}
+}
+function storeSession(session){
+ authSession=session;
+ sessionStorage.setItem(AUTH_SESSION_KEY,JSON.stringify(session));
+}
+function clearSession(){
+ authSession=null;
+ sessionStorage.removeItem(AUTH_SESSION_KEY);
+}
+function showLogin(message=""){
+ $("app-shell").classList.add("hidden");
+ $("auth-gate").classList.remove("hidden");
+ $("login-form").classList.remove("hidden");
+ $("password-form").classList.add("hidden");
+ $("auth-error").textContent=message;
+ $("auth-error").classList.toggle("hidden",!message);
+}
+function showPasswordSetup(flowType){
+ $("app-shell").classList.add("hidden");
+ $("auth-gate").classList.remove("hidden");
+ $("login-form").classList.add("hidden");
+ $("password-form").classList.remove("hidden");
+ const recovery=flowType==="recovery";
+ $("password-title").textContent=recovery?"Choose a new password":"Set your engineer password";
+ $("password-description").textContent=recovery?"Enter a new password for your engineer account.":"Choose a password to finish setting up your engineer account.";
+ $("password-error").classList.add("hidden");
+}
+async function refreshSession(){
+ if(!authSession?.refresh_token)return false;
+ const response=await fetch(authConfig.supabaseUrl+"/auth/v1/token?grant_type=refresh_token",{
+  method:"POST",headers:{apikey:authConfig.publishableKey,"Content-Type":"application/json"},
+  body:JSON.stringify({refresh_token:authSession.refresh_token})
+ });
+ if(!response.ok){clearSession();return false}
+ const refreshed=await response.json();
+ if(authSession.passwordSetupPending)refreshed.passwordSetupPending=true;
+ storeSession(refreshed);
+ return true;
+}
+async function authenticatedFetch(path,options={}){
+ const send=()=>{
+  const headers=new Headers(options.headers||{});
+  headers.set("Authorization","Bearer "+authSession.access_token);
+  return fetch(path,{...options,headers,cache:"no-store"});
+ };
+ let response=await send();
+ if(response.status===401&&await refreshSession())response=await send();
+ return response;
+}
 async function loadBackend(){
- if(loadingLiveData)return;
+ if(loadingLiveData||!authSession)return;
  loadingLiveData=true;
  try{
-  const health=await fetch("/api/health",{cache:"no-store"});if(!health.ok)throw new Error("API health check failed");
-  const response=await fetch("/api/v1/machines",{cache:"no-store"});if(!response.ok)throw new Error("Machine list request failed");
+  const response=await authenticatedFetch("/api/v1/dashboard");
+  if(response.status===401){clearSession();showLogin("Your session expired. Please sign in again.");return}
+  if(!response.ok)throw new Error("Could not load sensor readings. Refresh the page to retry.");
   const payload=await response.json();
-  const liveMachines=await Promise.all(payload.machines.map(async machine=>{
-   const result=await fetch("/api/v1/machines/"+machine.id+"/readings?limit=100",{cache:"no-store"});
-   if(!result.ok)throw new Error("Reading request failed for machine "+machine.id);
-   const body=await result.json();
+  machines=payload.machines.map(machine=>{
    const motors=(machine.latestReadings||[]).map(reading=>({motorId:reading.motorId,temperatureC:reading.temperatureC,currentA:reading.currentA,vibrationMmS:reading.vibrationMmS,timestamp:reading.timestamp}));
-   const readings=(body.readings||[]).slice().sort((a,b)=>b.timestamp.localeCompare(a.timestamp));
+   const readings=(machine.readings||[]).slice().sort((a,b)=>b.timestamp.localeCompare(a.timestamp));
    const latest=motors.slice().sort((a,b)=>b.timestamp.localeCompare(a.timestamp))[0]||null;
    return {id:machine.id,motors,readings,latest};
-  }));
-  machines=liveMachines;dataMode="live";
+  });
+  dataMode="live";loadError="";
  }catch(error){
-  machines=sampleMachines;dataMode="sample";
+  machines=[1,2,3,4,5,6].map(id=>({id,motors:[],readings:[],latest:null}));
+  dataMode="live";loadError=error.message||"Sensor readings could not be loaded.";
  }finally{
   loadingLiveData=false;
-  if(selectedMachine)showMachine(selectedMachine);else showOverview();
+  if(authSession){if(selectedMachine)showMachine(selectedMachine);else showOverview()}
  }
 }
+async function enterDashboard(){
+ $("auth-gate").classList.add("hidden");
+ $("app-shell").classList.remove("hidden");
+ $("account-email").textContent=authSession?.user?.email||"Signed-in engineer";
+ await loadBackend();
+}
+async function initializeAuth(){
+ try{
+  const response=await fetch("/api/auth/config",{cache:"no-store"});
+  if(!response.ok)throw new Error("Engineer sign-in is not configured. Add SUPABASE_PUBLISHABLE_KEY in Netlify.");
+  authConfig=await response.json();
+  $("login-submit").disabled=false;
+  $("forgot-password").disabled=false;
+ }catch(error){showLogin(error.message);return}
+ authSession=readStoredSession();
+ const params=new URLSearchParams(window.location.hash.replace(/^#/,""));
+ const flowType=params.get("type");
+ if(["invite","recovery"].includes(flowType)&&params.get("access_token")){
+  authSession={
+   access_token:params.get("access_token"),
+   refresh_token:params.get("refresh_token"),
+   token_type:params.get("token_type")||"bearer",
+   expires_in:Number(params.get("expires_in")||3600),
+   passwordSetupPending:true,
+   flowType,
+  };
+  storeSession(authSession);
+  history.replaceState(null,document.title,window.location.pathname+window.location.search);
+ }
+ if(params.get("error_description")){
+  showLogin("The email link could not be accepted. Request a fresh invite or password reset email.");
+  return;
+ }
+ if(authSession?.access_token&&authSession.passwordSetupPending){
+  try{
+   const userResponse=await fetch(authConfig.supabaseUrl+"/auth/v1/user",{headers:{apikey:authConfig.publishableKey,Authorization:"Bearer "+authSession.access_token}});
+   if(!userResponse.ok)throw new Error("This email link has expired. Request a fresh one.");
+   authSession.user=await userResponse.json();storeSession(authSession);showPasswordSetup(authSession.flowType||flowType);
+  }catch(error){clearSession();showLogin(error.message)}
+  return;
+ }
+ if(authSession?.access_token)await enterDashboard();else showLogin();
+}
+$("login-form").addEventListener("submit",async event=>{
+ event.preventDefault();
+ const button=$("login-submit");button.disabled=true;button.textContent="Signing in…";
+ try{
+  const response=await fetch(authConfig.supabaseUrl+"/auth/v1/token?grant_type=password",{
+   method:"POST",headers:{apikey:authConfig.publishableKey,"Content-Type":"application/json"},
+   body:JSON.stringify({email:$("login-email").value.trim(),password:$("login-password").value})
+  });
+  const result=await response.json();
+  if(!response.ok)throw new Error("Sign-in failed. Check your email and password, or ask the administrator to create your engineer account.");
+  storeSession(result);$("login-form").reset();await enterDashboard();
+ }catch(error){showLogin(error.message||"Sign-in failed.")}
+ finally{button.disabled=false;button.textContent="Sign in"}
+});
+$("forgot-password").addEventListener("click",async()=>{
+ const email=$("login-email").value.trim();
+ $("auth-success").classList.add("hidden");
+ if(!email){$("auth-error").textContent="Enter your email address first.";$("auth-error").classList.remove("hidden");return}
+ const button=$("forgot-password");button.disabled=true;
+ try{
+  const redirect=encodeURIComponent(window.location.origin);
+  const response=await fetch(authConfig.supabaseUrl+"/auth/v1/recover?redirect_to="+redirect,{
+   method:"POST",headers:{apikey:authConfig.publishableKey,"Content-Type":"application/json"},body:JSON.stringify({email})
+  });
+  if(!response.ok)throw new Error("Password recovery email could not be requested. Try again later.");
+  $("auth-error").classList.add("hidden");
+  $("auth-success").textContent="If that account exists, a password reset email has been sent.";
+  $("auth-success").classList.remove("hidden");
+ }catch(error){$("auth-error").textContent=error.message;$("auth-error").classList.remove("hidden")}
+ finally{button.disabled=false}
+});
+$("password-form").addEventListener("submit",async event=>{
+ event.preventDefault();
+ const password=$("new-password").value;
+ if(password!==$("confirm-password").value){$("password-error").textContent="The passwords do not match.";$("password-error").classList.remove("hidden");return}
+ const button=$("password-submit");button.disabled=true;button.textContent="Saving…";
+ try{
+  const response=await fetch(authConfig.supabaseUrl+"/auth/v1/user",{
+   method:"PUT",headers:{apikey:authConfig.publishableKey,Authorization:"Bearer "+authSession.access_token,"Content-Type":"application/json"},
+   body:JSON.stringify({password})
+  });
+  if(!response.ok)throw new Error("Password could not be saved. Request a fresh email link and try again.");
+  authSession.user=await response.json();delete authSession.passwordSetupPending;delete authSession.flowType;
+  storeSession(authSession);$("password-form").reset();await enterDashboard();
+ }catch(error){$("password-error").textContent=error.message;$("password-error").classList.remove("hidden")}
+ finally{button.disabled=false;button.textContent="Save password"}
+});
+$("sign-out").addEventListener("click",async()=>{
+ if(authSession?.access_token){
+  try{await fetch(authConfig.supabaseUrl+"/auth/v1/logout",{method:"POST",headers:{apikey:authConfig.publishableKey,Authorization:"Bearer "+authSession.access_token}})}catch{}
+ }
+ clearSession();showLogin();
+});
 $("machine-menu").addEventListener("change",event=>event.target.value?showMachine(Number(event.target.value)):showOverview());
 $("home-link").addEventListener("click",event=>{event.preventDefault();showOverview()});
-showOverview();
-loadBackend();
-setInterval(loadBackend,15000);
+initializeAuth();
+setInterval(()=>{if(authSession)loadBackend()},15000);
 </script>
 </body>
 </html>

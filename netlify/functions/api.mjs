@@ -11,6 +11,29 @@ function respond(status, body) {
   return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 }
 
+function getAuthConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '');
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!supabaseUrl || !publishableKey) {
+    throw Object.assign(new Error('Engineer sign-in is not configured.'), { statusCode: 503 });
+  }
+  return { supabaseUrl, publishableKey };
+}
+
+async function isEngineerAuthenticated(request) {
+  const accessToken = request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!accessToken) return false;
+
+  const { supabaseUrl, publishableKey } = getAuthConfig();
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      apikey: publishableKey,
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response.ok;
+}
+
 function mapRow(row) {
   return {
     id: row.id,
@@ -89,8 +112,35 @@ export default async function handler(request) {
   const url = new URL(request.url);
 
   try {
+    if (request.method === 'GET' && url.pathname === '/api/auth/config') {
+      const { supabaseUrl, publishableKey } = getAuthConfig();
+      return respond(200, { supabaseUrl, publishableKey });
+    }
+
     if (request.method === 'GET' && url.pathname === '/api/health') {
       return respond(200, { ok: true, service: 'motor-condition-monitoring-api' });
+    }
+
+    if (request.method === 'GET' && url.pathname.startsWith('/api/v1/')) {
+      const authenticated = await isEngineerAuthenticated(request);
+      if (!authenticated) return respond(401, { error: 'Engineer sign-in is required.' });
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/v1/dashboard') {
+      const [latestRows, historyRows] = await Promise.all([
+        supabase('rpc/latest_motor_readings', { method: 'POST', body: '{}' }),
+        supabase('readings?select=*&order=timestamp.desc&limit=500'),
+      ]);
+      const latestReadings = latestRows.map(mapRow);
+      const readings = historyRows.map(mapRow);
+      const machines = MACHINE_IDS.map(id => ({
+        id,
+        name: `Machine ${id}`,
+        motorsReporting: latestReadings.filter(reading => reading.machineId === id).length,
+        latestReadings: latestReadings.filter(reading => reading.machineId === id),
+        readings: readings.filter(reading => reading.machineId === id).slice(0, 100),
+      }));
+      return respond(200, { machines });
     }
 
     if (request.method === 'GET' && url.pathname === '/api/v1/machines') {

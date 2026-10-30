@@ -61,6 +61,25 @@ function getMachineToken(machineId) {
   return process.env[`DEVICE_TOKEN_MACHINE_${machineId}`];
 }
 
+function getAuthConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, '');
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!supabaseUrl || !publishableKey) {
+    throw Object.assign(new Error('Engineer sign-in is not configured.'), { statusCode: 503 });
+  }
+  return { supabaseUrl, publishableKey };
+}
+
+async function isEngineerAuthenticated(request) {
+  const accessToken = request.headers.authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!accessToken) return false;
+  const { supabaseUrl, publishableKey } = getAuthConfig();
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: publishableKey, Authorization: `Bearer ${accessToken}` },
+  });
+  return response.ok;
+}
+
 function hasValidDeviceToken(request, machineId) {
   const expected = getMachineToken(machineId);
   const supplied = request.headers.authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
@@ -124,8 +143,44 @@ function validateReading(body) {
 }
 
 async function handleApi(request, response, url) {
+  if (request.method === 'GET' && url.pathname === '/api/auth/config') {
+    const { supabaseUrl, publishableKey } = getAuthConfig();
+    return sendJson(response, 200, { supabaseUrl, publishableKey });
+  }
+
   if (request.method === 'GET' && url.pathname === '/api/health') {
     return sendJson(response, 200, { ok: true, service: 'motor-condition-monitoring-api' });
+  }
+
+  if (request.method === 'GET' && url.pathname.startsWith('/api/v1/')) {
+    const authenticated = await isEngineerAuthenticated(request);
+    if (!authenticated) return sendJson(response, 401, { error: 'Engineer sign-in is required.' });
+  }
+
+  if (request.method === 'GET' && url.pathname === '/api/v1/dashboard') {
+    const readings = await readReadings();
+    const latestByMachine = new Map();
+    for (const id of MACHINE_IDS) {
+      const machineReadings = readings
+        .filter(reading => reading.machineId === id)
+        .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+      const latestByMotor = new Map();
+      for (const reading of machineReadings) {
+        if (!latestByMotor.has(reading.motorId)) latestByMotor.set(reading.motorId, reading);
+      }
+      latestByMachine.set(id, [...latestByMotor.values()]);
+    }
+    const machines = [...MACHINE_IDS].map(id => ({
+      id,
+      name: `Machine ${id}`,
+      motorsReporting: latestByMachine.get(id).length,
+      latestReadings: latestByMachine.get(id),
+      readings: readings
+        .filter(reading => reading.machineId === id)
+        .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
+        .slice(0, 100),
+    }));
+    return sendJson(response, 200, { machines });
   }
 
   if (request.method === 'GET' && url.pathname === '/api/v1/machines') {
