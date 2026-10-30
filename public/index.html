@@ -156,6 +156,7 @@ const sampleMachines=[
  {id:5,temp:68,current:42,vib:6.2,state:"Inspect",due:"2026-11-03",work:"Inspect bearing and review vibration trend",trend:[3.6,3.9,3.7,4.5,4.9,5.6,6.2]},
  {id:6,temp:56,current:34,vib:2.4,state:"Normal",due:"2026-11-12",work:"Routine maintenance check",trend:[2.4,2.5,2.4,2.3,2.5,2.4,2.4]}
 ];
+const weeklyMaintenancePlan=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map((day,index)=>({day,machine:index+1}));
 let machines=sampleMachines;
 let dataMode="live";
 let selectedMachine=null;
@@ -221,7 +222,7 @@ function showOverview(){
   $("alerts-title").textContent="Motors requiring urgent attention";
   $("alerts").innerHTML='<p class="subtitle">Urgency is not configured yet. Add validated, motor-specific alarm limits before the dashboard can identify motors requiring urgent attention. No motor is currently classified as urgent.</p>';
   $("live-maintenance-card").classList.remove("hidden");
-  $("live-maintenance-content").innerHTML='<p class="subtitle">No maintenance schedule has been configured yet. Add due dates and work items for each crane motor to display planned maintenance here.</p>';
+  $("live-maintenance-content").innerHTML='<p class="subtitle">Proposed weekly rotation: inspect all three motors on one crane each day, Monday through Saturday.</p><div class="table-wrap"><table><thead><tr><th>Day</th><th>Crane</th><th>Planned work</th></tr></thead><tbody>'+weeklyMaintenancePlan.map(plan=>'<tr><td>'+plan.day+'</td><td>Machine '+plan.machine+'</td><td>Inspect all three motors</td></tr>').join("")+'</tbody></table></div><p class="subtitle">Prototype schedule only. Confirm work timing and intervals with the KPA maintenance team.</p>';
   $("jobs-title").textContent="Latest motor readings";$("jobs-head-1").textContent="Received";$("jobs-head-3").textContent="Motor · temperature / current / vibration";$("jobs-head-4").textContent="Data";
   $("jobs").innerHTML=allMotors.sort((a,b)=>b.timestamp.localeCompare(a.timestamp)).map(m=>'<tr><td>'+escapeHtml(dateTime(m.timestamp))+'</td><td><button class="link" data-machine="'+m.machineId+'">Machine '+m.machineId+'</button></td><td>'+escapeHtml(m.motorId)+' · '+m.temperatureC+' °C / '+m.currentA+' A / '+m.vibrationMmS+' mm/s</td><td>Received</td></tr>').join("")||'<tr><td colspan="4">No sensor readings received yet.</td></tr>';
  }
