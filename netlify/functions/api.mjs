@@ -34,6 +34,16 @@ async function isEngineerAuthenticated(request) {
   return response.ok;
 }
 
+async function getEngineerUser(request) {
+  const accessToken = request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!accessToken) return null;
+  const { supabaseUrl, publishableKey } = getAuthConfig();
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: publishableKey, Authorization: `Bearer ${accessToken}` },
+  });
+  return response.ok ? response.json() : null;
+}
+
 function mapRow(row) {
   return {
     id: row.id,
@@ -45,6 +55,74 @@ function mapRow(row) {
     timestamp: new Date(row.timestamp).toISOString(),
     receivedAt: new Date(row.received_at).toISOString(),
   };
+}
+
+function mapInspection(row) {
+  return {
+    id: row.id,
+    machineId: row.machine_id,
+    scheduleDay: row.schedule_day,
+    maintenanceDate: row.maintenance_date,
+    motorIds: row.motor_ids || [],
+    functionalityStatus: row.functionality_status,
+    wiringStatus: row.wiring_status,
+    sensorStatus: row.sensor_status,
+    mountingStatus: row.mounting_status,
+    noiseVibrationStatus: row.noise_vibration_status,
+    safetyStatus: row.safety_status,
+    lubricationStatus: row.lubrication_status,
+    comments: row.comments,
+    followUpActions: row.follow_up_actions,
+    engineerEmail: row.engineer_email,
+    createdAt: new Date(row.created_at).toISOString(),
+  };
+}
+
+function validateInspection(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { issues: ['The request body must be a JSON object.'] };
+  const machineId = Number(body.machineId);
+  const scheduleDay = typeof body.scheduleDay === 'string' ? body.scheduleDay : '';
+  const expectedDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const date = typeof body.maintenanceDate === 'string' ? body.maintenanceDate : '';
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  const parsedDate = datePattern.test(date) ? new Date(`${date}T00:00:00Z`) : null;
+  const statuses = ['satisfactory', 'attention', 'not_checked'];
+  const fields = {
+    functionality_status: body.functionalityStatus,
+    wiring_status: body.wiringStatus,
+    sensor_status: body.sensorStatus,
+    mounting_status: body.mountingStatus,
+    noise_vibration_status: body.noiseVibrationStatus,
+    safety_status: body.safetyStatus,
+    lubrication_status: body.lubricationStatus,
+  };
+  const expectedDayByMachine = expectedDays[machineId - 1];
+  const motorIds = Array.isArray(body.motorIds)
+    ? [...new Set(body.motorIds.map(value => typeof value === 'string' ? value.trim() : ''))]
+    : [];
+  const comments = typeof body.comments === 'string' ? body.comments.trim() : '';
+  const followUpActions = typeof body.followUpActions === 'string' ? body.followUpActions.trim() : '';
+  const issues = [];
+
+  if (!MACHINE_IDS.includes(machineId)) issues.push('machineId must be a number from 1 to 6.');
+  if (!expectedDays.includes(scheduleDay) || scheduleDay !== expectedDayByMachine) issues.push('scheduleDay must match the weekly machine rotation.');
+  if (!parsedDate || !Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== date) issues.push('maintenanceDate must be a valid date in YYYY-MM-DD format.');
+  if (!motorIds.length || motorIds.length > 10 || motorIds.some(id => !id || id.length > 64)) issues.push('Select at least one valid motor (64 characters or fewer).');
+  for (const [field, value] of Object.entries(fields)) {
+    if (!statuses.includes(value)) issues.push(`${field} must be satisfactory, attention, or not_checked.`);
+  }
+  if (comments.length > 3000) issues.push('comments must be 3000 characters or fewer.');
+  if (followUpActions.length > 2000) issues.push('followUpActions must be 2000 characters or fewer.');
+  if (issues.length) return { issues };
+  return { value: {
+    machine_id: machineId,
+    schedule_day: scheduleDay,
+    maintenance_date: date,
+    motor_ids: motorIds,
+    ...fields,
+    comments,
+    follow_up_actions: followUpActions,
+  } };
 }
 
 function hasValidDeviceToken(request, machineId) {
@@ -141,6 +219,30 @@ export default async function handler(request) {
         readings: readings.filter(reading => reading.machineId === id).slice(0, 100),
       }));
       return respond(200, { machines });
+    }
+
+    if (request.method === 'GET' && url.pathname === '/api/v1/maintenance/inspections') {
+      const rows = await supabase('maintenance_inspections?select=*&order=maintenance_date.desc,created_at.desc&limit=50');
+      return respond(200, { inspections: rows.map(mapInspection) });
+    }
+
+    if (request.method === 'POST' && url.pathname === '/api/v1/maintenance/inspections') {
+      const engineer = await getEngineerUser(request);
+      if (!engineer) return respond(401, { error: 'Engineer sign-in is required.' });
+      let body;
+      try {
+        body = await request.json();
+      } catch {
+        return respond(400, { error: 'Send a valid JSON request body.' });
+      }
+      const result = validateInspection(body);
+      if (result.issues) return respond(400, { error: 'Inspection record is invalid.', issues: result.issues });
+      const inserted = await supabase('maintenance_inspections', {
+        method: 'POST',
+        headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({ ...result.value, engineer_id: engineer.id, engineer_email: engineer.email || '' }),
+      });
+      return respond(201, { saved: true, inspection: mapInspection(inserted[0]) });
     }
 
     if (request.method === 'GET' && url.pathname === '/api/v1/machines') {

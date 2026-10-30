@@ -8,6 +8,7 @@ The browser dashboard is a static site. Netlify Functions will provide the same 
 
 1. Create a Supabase project.
 2. In its SQL Editor, run `supabase/schema.sql` from this project.
+   For an existing project that already ran the original schema, run `supabase/maintenance-inspections.sql` to add the engineer inspection log.
 3. Optional, for the six-machine demo: run `supabase/seed-two-more-motors.sql` to add fictional `motor-2` and `motor-3` readings to each machine. This script leaves existing readings unchanged and can be rerun safely. Replace these placeholder motor IDs with KPA's verified motor names later.
 4. In **Project Settings → API Keys**, copy the project URL, the `sb_publishable_...` publishable key, and the `sb_secret_...` secret key. The publishable key identifies the public app; the secret key belongs only in Netlify's server-side environment settings. [Supabase API key guidance](https://supabase.com/docs/guides/getting-started/api-keys)
 5. In **Authentication → Settings**, disable **Allow new users to sign up**. Then open **Authentication → Users** and invite or create only approved engineer accounts. [Supabase Auth settings](https://supabase.com/docs/guides/auth/general-configuration) · [User management](https://supabase.com/docs/guides/auth/users)
@@ -36,4 +37,4 @@ In a synthetic-data demo, ESP32s can send `POST /api/v1/readings` to the HTTPS s
 
 The local `server.js` still saves its demo readings to `data/readings.json`. It now also requires an authenticated Supabase account to read them. When running `start-server.cmd`, enter the project URL and publishable key when prompted. The deployed function saves readings to Supabase. A reading submitted to the laptop is not automatically copied to Supabase.
 
-Condition thresholds and maintenance actions are not implemented. The dashboard shows measurements only; use machine-specific limits approved for the prototype before displaying alarms.
+The live dashboard includes a proposed Monday-to-Saturday maintenance rotation and an engineer inspection form. Inspection records include motor selection, system functionality, wiring, sensors, mounting, noise/vibration, safety guards, lubrication/leaks, comments, and follow-up actions. For an existing Supabase project, run `supabase/maintenance-inspections.sql` before deploying the inspection form. Condition thresholds for urgent motor classification remain unconfigured; use machine-specific limits approved for the prototype before displaying alarms.

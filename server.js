@@ -7,6 +7,7 @@ const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const DATA_DIR = path.join(ROOT, 'data');
 const READINGS_FILE = path.join(DATA_DIR, 'readings.json');
+const INSPECTIONS_FILE = path.join(DATA_DIR, 'maintenance-inspections.json');
 const HOST = process.env.HOST || '127.0.0.1';
 const PORT = Number(process.env.PORT || 3000);
 const MAX_BODY_BYTES = 16 * 1024;
@@ -39,11 +40,38 @@ async function writeReadings(readings) {
   await fs.rename(temporaryFile, READINGS_FILE);
 }
 
+async function readInspections() {
+  try {
+    return JSON.parse(await fs.readFile(INSPECTIONS_FILE, 'utf8'));
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(INSPECTIONS_FILE, '[]\n', 'utf8');
+    return [];
+  }
+}
+
+async function writeInspections(inspections) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  const temporaryFile = `${INSPECTIONS_FILE}.tmp`;
+  await fs.writeFile(temporaryFile, `${JSON.stringify(inspections, null, 2)}\n`, 'utf8');
+  await fs.rename(temporaryFile, INSPECTIONS_FILE);
+}
+
 function persistReading(reading) {
   writeQueue = writeQueue.catch(() => {}).then(async () => {
     const readings = await readReadings();
     readings.push(reading);
     await writeReadings(readings);
+  });
+  return writeQueue;
+}
+
+function persistInspection(inspection) {
+  writeQueue = writeQueue.catch(() => {}).then(async () => {
+    const inspections = await readInspections();
+    inspections.unshift(inspection);
+    await writeInspections(inspections);
   });
   return writeQueue;
 }
@@ -78,6 +106,16 @@ async function isEngineerAuthenticated(request) {
     headers: { apikey: publishableKey, Authorization: `Bearer ${accessToken}` },
   });
   return response.ok;
+}
+
+async function getEngineerUser(request) {
+  const accessToken = request.headers.authorization?.match(/^Bearer\s+(.+)$/i)?.[1];
+  if (!accessToken) return null;
+  const { supabaseUrl, publishableKey } = getAuthConfig();
+  const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: { apikey: publishableKey, Authorization: `Bearer ${accessToken}` },
+  });
+  return response.ok ? response.json() : null;
 }
 
 function hasValidDeviceToken(request, machineId) {
@@ -142,6 +180,46 @@ function validateReading(body) {
   };
 }
 
+function validateInspection(body) {
+  if (!body || typeof body !== 'object' || Array.isArray(body)) return { issues: ['The request body must be a JSON object.'] };
+  const machineId = Number(body.machineId);
+  const scheduleDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const scheduleDay = typeof body.scheduleDay === 'string' ? body.scheduleDay : '';
+  const maintenanceDate = typeof body.maintenanceDate === 'string' ? body.maintenanceDate : '';
+  const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+  const parsedDate = datePattern.test(maintenanceDate) ? new Date(`${maintenanceDate}T00:00:00Z`) : null;
+  const statuses = ['satisfactory', 'attention', 'not_checked'];
+  const statusFields = {
+    functionalityStatus: body.functionalityStatus,
+    wiringStatus: body.wiringStatus,
+    sensorStatus: body.sensorStatus,
+    mountingStatus: body.mountingStatus,
+    noiseVibrationStatus: body.noiseVibrationStatus,
+    safetyStatus: body.safetyStatus,
+    lubricationStatus: body.lubricationStatus,
+  };
+  const motorIds = Array.isArray(body.motorIds)
+    ? [...new Set(body.motorIds.map(value => typeof value === 'string' ? value.trim() : ''))]
+    : [];
+  const comments = typeof body.comments === 'string' ? body.comments.trim() : '';
+  const followUpActions = typeof body.followUpActions === 'string' ? body.followUpActions.trim() : '';
+  const issues = [];
+
+  if (!MACHINE_IDS.has(machineId)) issues.push('machineId must be a number from 1 to 6.');
+  if (!scheduleDays.includes(scheduleDay) || scheduleDay !== scheduleDays[machineId - 1]) issues.push('scheduleDay must match the weekly machine rotation.');
+  if (!parsedDate || !Number.isFinite(parsedDate.getTime()) || parsedDate.toISOString().slice(0, 10) !== maintenanceDate) issues.push('maintenanceDate must be a valid date in YYYY-MM-DD format.');
+  if (!motorIds.length || motorIds.length > 10 || motorIds.some(id => !id || id.length > 64)) issues.push('Select at least one valid motor (64 characters or fewer).');
+  for (const [field, value] of Object.entries(statusFields)) {
+    if (!statuses.includes(value)) issues.push(`${field} must be satisfactory, attention, or not_checked.`);
+  }
+  if (comments.length > 3000) issues.push('comments must be 3000 characters or fewer.');
+  if (followUpActions.length > 2000) issues.push('followUpActions must be 2000 characters or fewer.');
+  if (issues.length) return { issues };
+  return { value: {
+    machineId, scheduleDay, maintenanceDate, motorIds, ...statusFields, comments, followUpActions,
+  } };
+}
+
 async function handleApi(request, response, url) {
   if (request.method === 'GET' && url.pathname === '/api/auth/config') {
     const { supabaseUrl, publishableKey } = getAuthConfig();
@@ -181,6 +259,27 @@ async function handleApi(request, response, url) {
         .slice(0, 100),
     }));
     return sendJson(response, 200, { machines });
+  }
+
+  if (request.method === 'GET' && url.pathname === '/api/v1/maintenance/inspections') {
+    const inspections = await readInspections();
+    return sendJson(response, 200, { inspections: inspections.slice(0, 50) });
+  }
+
+  if (request.method === 'POST' && url.pathname === '/api/v1/maintenance/inspections') {
+    const engineer = await getEngineerUser(request);
+    if (!engineer) return sendJson(response, 401, { error: 'Engineer sign-in is required.' });
+    const body = await readJsonBody(request);
+    const result = validateInspection(body);
+    if (result.issues) return sendJson(response, 400, { error: 'Inspection record is invalid.', issues: result.issues });
+    const inspection = {
+      id: crypto.randomUUID(),
+      ...result.value,
+      engineerEmail: engineer.email || '',
+      createdAt: new Date().toISOString(),
+    };
+    await persistInspection(inspection);
+    return sendJson(response, 201, { saved: true, inspection });
   }
 
   if (request.method === 'GET' && url.pathname === '/api/v1/machines') {

@@ -47,6 +47,22 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
 .maintenance{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px}
 .maintenance div{border-top:1px solid var(--line);padding-top:8px;font-size:10px}
 .maintenance small{display:block;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.5px;margin-bottom:3px}
+.inspection-form{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.inspection-form h3,.inspection-history h3{font-size:12px;margin:0 0 10px}
+.inspection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.inspection-form label{display:block;font-size:10px;font-weight:700;color:var(--ink)}
+.inspection-form input,.inspection-form select,.inspection-form textarea{display:block;width:100%;margin-top:4px;padding:9px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:inherit}
+.inspection-form textarea{min-height:75px;resize:vertical}
+.inspection-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.motor-checks{display:flex;flex-wrap:wrap;gap:8px;margin:7px 0}
+.motor-checks label{display:flex;align-items:center;gap:5px;padding:5px 8px;border:1px solid var(--line);border-radius:6px}
+.motor-checks input{width:auto;margin:0}
+.inspection-history{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.inspection-log{padding:10px 0;border-top:1px solid var(--line);font-size:10px}
+.inspection-log:first-of-type{border-top:0}
+.inspection-log p{margin:4px 0;white-space:pre-wrap}
+.inspection-error{color:var(--red)}
+.inspection-success{color:var(--green)}
 .footer{color:#8d99a5;font-size:9px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
 .footer a{color:var(--teal);font-weight:700;text-decoration:none}.footer a:hover{text-decoration:underline}
 .hidden{display:none!important}
@@ -69,6 +85,7 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
 @media(max-width:850px){.layout{grid-template-columns:205px 1fr}.metrics{grid-template-columns:repeat(2,1fr)}.cols{grid-template-columns:1fr}}
 @media(max-width:760px){.layout{display:block}aside{display:block;position:relative;padding:12px 14px}.brand{padding:3px 7px 10px 51px;min-height:43px}.mobile-menu-toggle{position:absolute;display:flex;flex-direction:column;justify-content:center;gap:5px;top:13px;left:14px;width:38px;height:36px;padding:8px;border:1px solid #527087;border-radius:7px;background:#193851;cursor:pointer}.mobile-menu-toggle span{display:block;width:20px;height:2px;background:#fff;border-radius:2px}.mobile-menu-toggle:focus-visible{outline:2px solid #52c8ba;outline-offset:2px}.primary-nav{display:none;position:absolute;z-index:10;top:58px;left:14px;width:min(280px,calc(100vw - 28px));padding:10px;background:var(--navy);border:1px solid #527087;border-radius:10px;box-shadow:0 12px 28px #07182766;flex-direction:column;align-items:stretch;gap:4px}.primary-nav.open{display:flex}.primary-nav .nav-title{display:block;margin:12px 9px 5px}.primary-nav .nav-link{width:100%;margin:0;padding:10px}.machine-select{width:100%;min-width:0;padding:10px}.nav-secondary{display:flex;flex-direction:column;gap:4px}.nav-secondary .nav-link{font-size:14px}.side-note{display:none}main{padding:15px 12px}.top{align-items:flex-start}.top-actions{flex-wrap:wrap;justify-content:flex-end;gap:6px}.account-email{max-width:125px}h1{font-size:20px}.pill{font-size:8px;white-space:normal;text-align:center}.metrics{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.metric,.card{padding:11px}.cols{grid-template-columns:1fr}.machine-detail{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.reading{padding:9px}.reading strong{font-size:17px}.maintenance{grid-template-columns:1fr 1fr}.maintenance div:last-child{grid-column:1/-1}table{min-width:0;table-layout:fixed}th,td{padding:7px 4px;overflow-wrap:anywhere}th:first-child,td:first-child{width:72px}th:nth-child(2),td:nth-child(2){width:78px}th:last-child,td:last-child{display:none}}
 @media(max-width:380px){.machine-detail{grid-template-columns:1fr}.nav-secondary{margin-left:auto}.number{font-size:21px}}
+@media(max-width:760px){.inspection-grid,.inspection-checks{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -132,7 +149,7 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
       <div class="card"><h2 id="fleet-chart-title">Overall machine health · sample trend</h2><div id="fleet-chart"></div></div>
       <div class="card"><h2 id="alerts-title">Priority alerts</h2><div id="alerts"></div></div>
     </div>
-    <div class="card hidden" id="live-maintenance-card"><h2>Scheduled maintenance</h2><div id="live-maintenance-content"></div></div>
+    <div class="card hidden" id="live-maintenance-card"><h2>Scheduled maintenance & inspection log</h2><div id="live-maintenance-content"></div></div>
     <div class="card"><h2 id="jobs-title">Planned maintenance</h2><div class="table-wrap"><table><thead><tr><th id="jobs-head-1">Due</th><th>Machine</th><th id="jobs-head-3">Work</th><th id="jobs-head-4">Status</th></tr></thead><tbody id="jobs"></tbody></table></div></div>
   </section>
   <section id="machine-view" class="hidden"></section>
@@ -164,12 +181,90 @@ let loadingLiveData=false;
 let authConfig=null;
 let authSession=null;
 let loadError="";
+let maintenanceInspections=[];
+let maintenanceError="";
+let maintenanceMessage="";
 const AUTH_SESSION_KEY="motor-monitoring-engineer-session";
 const $=id=>document.getElementById(id);
 const date=value=>new Date(value).toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
 const dateTime=value=>new Date(value).toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"});
 const escapeHtml=value=>String(value??"").replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function status(value){return '<span class="status '+(value==="Inspect"?"bad":value==="Monitor"?"warn":"")+'">'+escapeHtml(value)+'</span>'}
+function localDateValue(){const now=new Date();return new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+function maintenanceStatusLabel(value){return value==="satisfactory"?"Satisfactory":value==="attention"?"Needs attention":"Not checked"}
+function renderMotorChoices(machineId,checkedValues){
+ const machine=machines.find(item=>item.id===Number(machineId));
+ let motors=(machine?.motors||[]).map(motor=>motor.motorId);
+ if(!motors.length)motors=["motor-1","motor-2","motor-3"];
+ const selected=checkedValues?new Set(checkedValues):new Set(motors);
+ $("inspection-motors").innerHTML=motors.map(motor=>'<label><input type="checkbox" name="motorIds" value="'+escapeHtml(motor)+'" '+(selected.has(motor)?"checked":"")+'> '+escapeHtml(motor)+'</label>').join("");
+}
+function renderMaintenance(){
+ const planRows=weeklyMaintenancePlan.map(plan=>'<tr><td>'+plan.day+'</td><td>Machine '+plan.machine+'</td><td>Inspect all three motors</td><td><button type="button" class="link" data-inspection-machine="'+plan.machine+'" data-inspection-day="'+plan.day+'">Record inspection</button></td></tr>').join("");
+ const inspectionFields=[
+  ["functionalityStatus","System functionality"],["wiringStatus","Wiring and electrical connections"],
+  ["sensorStatus","Sensors and sensor mounting"],["mountingStatus","Motor and equipment mounting"],
+  ["noiseVibrationStatus","Abnormal noise or vibration"],["safetyStatus","Guards and safety condition"],
+  ["lubricationStatus","Lubrication / visible leaks"],
+ ];
+ const checkFields=inspectionFields.map(([key,label])=>'<label>'+label+'<select name="'+key+'" required><option value="">Choose result</option><option value="satisfactory">Satisfactory</option><option value="attention">Needs attention</option><option value="not_checked">Not checked</option></select></label>').join("");
+ const history=maintenanceInspections.length?maintenanceInspections.map(record=>{
+  const checks=inspectionFields.map(([key,label])=>label+': '+maintenanceStatusLabel(record[key.replace(/[A-Z]/g,char=>"_"+char.toLowerCase())])).join(' · ');
+  return '<article class="inspection-log"><strong>'+escapeHtml(record.maintenanceDate)+' · Machine '+record.machineId+'</strong><div class="note">Scheduled '+escapeHtml(record.scheduleDay)+' · Motors: '+escapeHtml((record.motorIds||[]).join(', '))+' · Engineer: '+escapeHtml(record.engineerEmail||"Signed-in engineer")+'</div><p>'+escapeHtml(checks)+'</p>'+(record.comments?'<p><b>Comments:</b> '+escapeHtml(record.comments)+'</p>':'')+(record.followUpActions?'<p><b>Follow-up:</b> '+escapeHtml(record.followUpActions)+'</p>':'')+'</article>';
+ }).join(""):'<p class="subtitle">No inspection records saved yet.</p>';
+ $("live-maintenance-content").innerHTML='<p class="subtitle">Proposed weekly rotation: inspect all three motors on one crane each day, Monday through Saturday.</p><div class="table-wrap"><table><thead><tr><th>Day</th><th>Crane</th><th>Planned work</th><th>Action</th></tr></thead><tbody>'+planRows+'</tbody></table></div><p class="subtitle">Prototype schedule only. Confirm work timing and intervals with the KPA maintenance team.</p><form class="inspection-form" id="inspection-form"><h3>Record completed maintenance inspection</h3><div class="inspection-grid"><label>Machine<select id="inspection-machine" name="machineId" required>'+weeklyMaintenancePlan.map(plan=>'<option value="'+plan.machine+'">Machine '+plan.machine+'</option>').join("")+'</select></label><label>Scheduled day<input id="inspection-day" name="scheduleDay" readonly></label><label>Inspection date<input id="inspection-date" name="maintenanceDate" type="date" required value="'+localDateValue()+'"></label></div><label style="margin-top:12px">Motors inspected</label><div class="motor-checks" id="inspection-motors"></div><div class="inspection-checks">'+checkFields+'</div><label>Engineer comments<textarea name="comments" maxlength="3000" placeholder="Record observations, readings, defects, or work completed."></textarea></label><label style="margin-top:10px">Follow-up actions<textarea name="followUpActions" maxlength="2000" placeholder="Record repairs, parts, or a follow-up visit required."></textarea></label><p class="subtitle">Select a result for each inspection check. Use “Not checked” when the item could not be assessed.</p><button class="auth-submit" id="save-inspection" type="submit" style="width:auto;margin-top:4px">Save inspection</button><p id="inspection-message" class="subtitle '+(maintenanceError?'inspection-error':maintenanceMessage?'inspection-success':'')+'">'+escapeHtml(maintenanceError||maintenanceMessage)+'</p></form><section class="inspection-history"><h3>Recent inspection records</h3>'+history+'</section>';
+ $("inspection-machine").addEventListener("change",()=>{
+  const machineId=Number($("inspection-machine").value);
+  $("inspection-day").value=weeklyMaintenancePlan[machineId-1].day;
+  renderMotorChoices(machineId);
+ });
+ $("inspection-machine").value="1";
+ $("inspection-day").value="Monday";
+ renderMotorChoices(1);
+ $("inspection-form").addEventListener("submit",saveInspection);
+ document.querySelectorAll("[data-inspection-machine]").forEach(button=>button.addEventListener("click",()=>{
+  const machineId=Number(button.dataset.inspectionMachine);
+  $("inspection-machine").value=String(machineId);
+  $("inspection-day").value=button.dataset.inspectionDay;
+  renderMotorChoices(machineId);
+  $("inspection-form").scrollIntoView({behavior:"smooth",block:"center"});
+  $("inspection-machine").focus();
+ }));
+}
+async function loadMaintenanceRecords(){
+ try{
+  const response=await authenticatedFetch("/api/v1/maintenance/inspections");
+  if(!response.ok)throw new Error("Inspection storage is not ready. Run supabase/schema.sql in the Supabase SQL Editor, then refresh.");
+  const payload=await response.json();
+  maintenanceInspections=payload.inspections||[];maintenanceError="";
+ }catch(error){maintenanceInspections=[];maintenanceError=error.message||"Inspection records could not be loaded."}
+}
+async function saveInspection(event){
+ event.preventDefault();
+ const form=event.currentTarget;
+ const formData=new FormData(form);
+ const motorIds=[...form.querySelectorAll('input[name="motorIds"]:checked')].map(input=>input.value);
+ const payload={
+  machineId:Number(formData.get("machineId")),scheduleDay:String(formData.get("scheduleDay")),maintenanceDate:String(formData.get("maintenanceDate")),motorIds,
+  functionalityStatus:String(formData.get("functionalityStatus")),wiringStatus:String(formData.get("wiringStatus")),sensorStatus:String(formData.get("sensorStatus")),
+  mountingStatus:String(formData.get("mountingStatus")),noiseVibrationStatus:String(formData.get("noiseVibrationStatus")),safetyStatus:String(formData.get("safetyStatus")),
+  lubricationStatus:String(formData.get("lubricationStatus")),comments:String(formData.get("comments")||""),followUpActions:String(formData.get("followUpActions")||"")
+ };
+ const selectedMachineId=payload.machineId;
+ const button=$("save-inspection"),message=$("inspection-message");
+ button.disabled=true;button.textContent="Saving…";message.className="subtitle";message.textContent="";
+ try{
+  const response=await authenticatedFetch("/api/v1/maintenance/inspections",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(response.status===502?"Inspection storage is not ready. Run supabase/schema.sql in the Supabase SQL Editor, then refresh.":result.error||"Inspection could not be saved.");
+  maintenanceMessage="Inspection saved successfully.";
+  await loadMaintenanceRecords();
+  renderMaintenance();
+  $("inspection-machine").value=String(selectedMachineId);
+  $("inspection-day").value=weeklyMaintenancePlan[selectedMachineId-1].day;
+  renderMotorChoices(selectedMachineId,motorIds);
+ }catch(error){message.className="subtitle inspection-error";message.textContent=error.message||"Inspection could not be saved.";button.disabled=false;button.textContent="Save inspection"}
+}
 function chart(values,label,axisLabel="7 days ago"){
  const safeValues=values.filter(Number.isFinite);
  if(!safeValues.length)return '<p class="subtitle">No vibration readings have been received yet.</p>';
@@ -222,7 +317,7 @@ function showOverview(){
   $("alerts-title").textContent="Motors requiring urgent attention";
   $("alerts").innerHTML='<p class="subtitle">Urgency is not configured yet. Add validated, motor-specific alarm limits before the dashboard can identify motors requiring urgent attention. No motor is currently classified as urgent.</p>';
   $("live-maintenance-card").classList.remove("hidden");
-  $("live-maintenance-content").innerHTML='<p class="subtitle">Proposed weekly rotation: inspect all three motors on one crane each day, Monday through Saturday.</p><div class="table-wrap"><table><thead><tr><th>Day</th><th>Crane</th><th>Planned work</th></tr></thead><tbody>'+weeklyMaintenancePlan.map(plan=>'<tr><td>'+plan.day+'</td><td>Machine '+plan.machine+'</td><td>Inspect all three motors</td></tr>').join("")+'</tbody></table></div><p class="subtitle">Prototype schedule only. Confirm work timing and intervals with the KPA maintenance team.</p>';
+  renderMaintenance();
   $("jobs-title").textContent="Latest motor readings";$("jobs-head-1").textContent="Received";$("jobs-head-3").textContent="Motor · temperature / current / vibration";$("jobs-head-4").textContent="Data";
   $("jobs").innerHTML=allMotors.sort((a,b)=>b.timestamp.localeCompare(a.timestamp)).map(m=>'<tr><td>'+escapeHtml(dateTime(m.timestamp))+'</td><td><button class="link" data-machine="'+m.machineId+'">Machine '+m.machineId+'</button></td><td>'+escapeHtml(m.motorId)+' · '+m.temperatureC+' °C / '+m.currentA+' A / '+m.vibrationMmS+' mm/s</td><td>Received</td></tr>').join("")||'<tr><td colspan="4">No sensor readings received yet.</td></tr>';
  }
@@ -313,6 +408,7 @@ async function loadBackend(){
    const latest=motors.slice().sort((a,b)=>b.timestamp.localeCompare(a.timestamp))[0]||null;
    return {id:machine.id,motors,readings,latest};
   });
+  await loadMaintenanceRecords();
   dataMode="live";loadError="";
  }catch(error){
   machines=[1,2,3,4,5,6].map(id=>({id,motors:[],readings:[],latest:null}));
