@@ -132,6 +132,7 @@ td{font-size:10px;padding:9px 8px;border-bottom:1px solid #edf1f4}tr:last-child 
       <div class="card"><h2 id="fleet-chart-title">Overall machine health · sample trend</h2><div id="fleet-chart"></div></div>
       <div class="card"><h2 id="alerts-title">Priority alerts</h2><div id="alerts"></div></div>
     </div>
+    <div class="card hidden" id="live-maintenance-card"><h2>Scheduled maintenance</h2><div id="live-maintenance-content"></div></div>
     <div class="card"><h2 id="jobs-title">Planned maintenance</h2><div class="table-wrap"><table><thead><tr><th id="jobs-head-1">Due</th><th>Machine</th><th id="jobs-head-3">Work</th><th id="jobs-head-4">Status</th></tr></thead><tbody id="jobs"></tbody></table></div></div>
   </section>
   <section id="machine-view" class="hidden"></section>
@@ -190,6 +191,7 @@ function showOverview(){
  $("data-message").textContent=loadError;
  $("data-message").classList.toggle("hidden",!loadError);
  if(dataMode==="sample"){
+  $("live-maintenance-card").classList.add("hidden");
   $("subtitle").textContent="A single view of machine condition, priority alerts, and upcoming maintenance.";
   $("healthy-label").textContent="Healthy";$("healthy-note").textContent="Based on illustrative data";
   $("attention-label").textContent="Needs attention";$("attention-note").textContent="Review sample alerts";
@@ -216,8 +218,10 @@ function showOverview(){
   $("next-date").textContent=newest?dateTime(newest):"—";
   $("fleet-chart-title").textContent="Latest vibration by machine";
   $("fleet-chart").innerHTML=chart(reporting.map(m=>m.latest?.vibrationMmS).filter(Number.isFinite),"Latest reported vibration values by machine","Machines reporting");
-  $("alerts-title").textContent="Condition alerts";
-  $("alerts").innerHTML='<p class="subtitle">No alarm thresholds are configured. The dashboard is showing sensor values only; it is not classifying machine condition.</p>';
+  $("alerts-title").textContent="Motors requiring urgent attention";
+  $("alerts").innerHTML='<p class="subtitle">Urgency is not configured yet. Add validated, motor-specific alarm limits before the dashboard can identify motors requiring urgent attention. No motor is currently classified as urgent.</p>';
+  $("live-maintenance-card").classList.remove("hidden");
+  $("live-maintenance-content").innerHTML='<p class="subtitle">No maintenance schedule has been configured yet. Add due dates and work items for each crane motor to display planned maintenance here.</p>';
   $("jobs-title").textContent="Latest motor readings";$("jobs-head-1").textContent="Received";$("jobs-head-3").textContent="Motor · temperature / current / vibration";$("jobs-head-4").textContent="Data";
   $("jobs").innerHTML=allMotors.sort((a,b)=>b.timestamp.localeCompare(a.timestamp)).map(m=>'<tr><td>'+escapeHtml(dateTime(m.timestamp))+'</td><td><button class="link" data-machine="'+m.machineId+'">Machine '+m.machineId+'</button></td><td>'+escapeHtml(m.motorId)+' · '+m.temperatureC+' °C / '+m.currentA+' A / '+m.vibrationMmS+' mm/s</td><td>Received</td></tr>').join("")||'<tr><td colspan="4">No sensor readings received yet.</td></tr>';
  }
